@@ -1,0 +1,161 @@
+/* Container styles */
+.homepage-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: "Inter", sans-serif;
+}
+
+/* Header styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.logo {
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.brand-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #39b7ff;
+  text-decoration: none;
+}
+
+.profile-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: #ffa94d;
+  cursor: pointer;
+}
+
+/* Banner styles */
+.banner-container {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.banner-image {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Carousel indicators */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.indicator {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background-color: #d1d5db;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.indicator.active {
+  background-color: #1f2937;
+}
+
+/* Action buttons */
+.action-button {
+  width: 100%;
+  padding: 1rem;
+  margin: 0.75rem 0;
+  border: none;
+  border-radius: 9999px;
+  background-color: #ffa94d;
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button:hover {
+  background-color: #ff922b;
+  transform: translateY(-1px);
+}
+
+.action-button span {
+  margin-right: 0.5rem;
+}
+
+/* Footer message */
+.footer-message {
+  margin-top: 2rem;
+  padding: 1rem;
+  text-align: center;
+  background: linear-gradient(to right, #fff3bf, #ffe5f1);
+  border-radius: 9999px;
+}
+
+.footer-message p {
+  color: #f06292;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .story-pal-container {
+    padding: 0.5rem;
+  }
+
+  .brand-name {
+    font-size: 1.5rem;
+  }
+
+  .action-button {
+    font-size: 1rem;
+    padding: 0.875rem;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Custom scrollbar */
+.story-pal-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.story-pal-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.story-pal-container::-webkit-scrollbar-thumb {
+  background: #ffa94d;
+  border-radius: 4px;
+}
+
+.story-pal-container::-webkit-scrollbar-thumb:hover {
+  background: #ff922b;
+}

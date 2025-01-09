@@ -1,0 +1,195 @@
+.story-input-container {
+  min-height: 100vh;
+  background-color: white;
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Back Button */
+.back-button {
+  display: flex;
+  align-items: center;
+  color: #ffa94d;
+  font-size: 1.1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+  transition: transform 0.2s ease;
+}
+
+.back-button:hover {
+  transform: translateX(-4px);
+}
+
+.back-button svg {
+  margin-right: 0.5rem;
+}
+
+/* Header Section */
+.header-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.magic-text {
+  color: #ffa94d;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-family: "Dancing Script", cursive;
+}
+
+.main-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: #4b5563;
+}
+
+/* Text Input Area */
+.text-input {
+  width: 100%;
+  height: 10rem;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  resize: none;
+  transition: all 0.3s ease;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: #ffa94d;
+  box-shadow: 0 0 0 3px rgba(255, 169, 77, 0.2);
+}
+
+/* Voice Input Section */
+.voice-input-section {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.mic-button {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background-color: #ffa94d;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  transition: all 0.3s ease;
+}
+
+.mic-button:hover {
+  background-color: #ff922b;
+  transform: scale(1.05);
+}
+
+.mic-button:active {
+  transform: scale(0.95);
+}
+
+/* Siri Animation Container */
+.voice-animation {
+  height: 8rem;
+  position: relative;
+  max-width: 20rem;
+  margin: 0 auto;
+}
+
+.voice-animation-bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+}
+
+.animation-bar {
+  width: 0.5rem;
+  background-color: #a78bfa;
+  border-radius: 999px;
+  transition: height 0.1s ease-in-out;
+}
+
+/* Status Text */
+.status-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Animation Keyframes */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.listening .mic-button {
+  animation: pulse 1.5s infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .story-input-container {
+    padding: 1rem;
+  }
+
+  .main-title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .text-input {
+    height: 8rem;
+  }
+}
+
+/* Custom Scrollbar */
+.text-input::-webkit-scrollbar {
+  width: 8px;
+}
+
+.text-input::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.text-input::-webkit-scrollbar-thumb {
+  background: #ffa94d;
+  border-radius: 4px;
+}
+
+.text-input::-webkit-scrollbar-thumb:hover {
+  background: #ff922b;
+}
+
+/* Font Loading */
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap");

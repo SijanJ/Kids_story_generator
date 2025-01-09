@@ -1,0 +1,162 @@
+/* StoryPage.css */
+
+.story-container {
+  min-height: 100vh;
+  background-color: white;
+  padding: 1.5rem;
+  max-width: 64rem;
+  margin: 0 auto;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Back Button Styles */
+.back-button {
+  display: flex;
+  align-items: center;
+  color: #ff9040;
+  font-size: 1.1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+  transition: transform 0.2s ease;
+}
+
+.back-button:hover {
+  transform: translateX(-4px);
+}
+
+.back-button svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+/* Title Section Styles */
+.title-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.story-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ff9040;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.story-subtitle {
+  font-size: 1.25rem;
+  color: #4b5563;
+}
+
+/* Progress Bar Styles */
+.progress-bar-container {
+  margin-bottom: 2rem;
+}
+
+.progress-bar {
+  height: 0.5rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #ff9040;
+  border-radius: 9999px;
+  transition: width 0.3s ease-in-out;
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Animation Area Styles */
+.animation-area {
+  background-color: #ffe4bc;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.animation-placeholder {
+  color: #6b7280;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+/* Story Text Styles */
+.story-text-container {
+  background: linear-gradient(135deg, #fff7ed 0%, #fef9c3 100%);
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.story-paragraph {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.story-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .story-container {
+    padding: 1rem;
+  }
+
+  .story-title {
+    font-size: 2rem;
+  }
+
+  .story-subtitle {
+    font-size: 1.125rem;
+  }
+
+  .animation-area {
+    padding: 1rem;
+  }
+
+  .story-text-container {
+    padding: 1.5rem;
+  }
+
+  .story-paragraph {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.story-container {
+  animation: fadeIn 0.5s ease-out;
+}
