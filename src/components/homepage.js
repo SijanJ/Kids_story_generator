@@ -16,8 +16,8 @@ const Homepage = () => {
       {/* Banner */}
       <div className="banner-container">
         <img
-          src="/api/placeholder/800/400"
-          alt="your banner here"
+          src="Ad.png"
+          alt="Add Image"
           className="banner-image animate-fade-in"
         />
 
