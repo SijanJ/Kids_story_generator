@@ -105,6 +105,3 @@ We welcome contributions to the **Kids Story Generator**! If you have an idea to
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
-
-Now the README is complete and includes all necessary sections. Let me know if you need any more modifications!
