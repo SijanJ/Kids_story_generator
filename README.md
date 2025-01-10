@@ -1,4 +1,3 @@
-```markdown
 # Kids Story Generator
 
 Welcome to the **Kids Story Generator**! This project is designed for the **Hack-a-Week 2025** event and aims to create fun, engaging, and personalized bedtime stories for children based on simple prompts provided by the user.
