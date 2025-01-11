@@ -1,27 +1,69 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Storypage.css";
 
 const Storypage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Mock data - replace with your backend data
-  const storyData = {
-    title: "Story ko title",
-    subtitle: "story ko sub title",
-    currentTime: "00:00",
-    totalTime: "06:09",
-    text: ["main story yeta"],
+  // Get the passed story data
+  const { title, subtitle, text, audio_url, total_time } = location.state || {
+    title: "Default Story Title",
+    subtitle: "Default Subtitle",
+    text: "No story text provided.",
+    audio_url: "",
+    total_time: 0,
   };
 
-  // Calculate progress percentage
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioError, setAudioError] = useState(null);
+  const audioRef = useRef(null);
+
+  // Construct full audio URL if it's a relative path
+  const fullAudioUrl = audio_url.startsWith('http') 
+    ? audio_url 
+    : `http://localhost:8080${audio_url}`;
+
+  useEffect(() => {
+    console.log('Audio URL:', fullAudioUrl); // Debug log
+    
+    if (audioRef.current) {
+      audioRef.current.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        setAudioError(e.message);
+      });
+    }
+  }, [fullAudioUrl]);
+
   const calculateProgress = () => {
-    const current = storyData.currentTime.split(":").map(Number);
-    const total = storyData.totalTime.split(":").map(Number);
-    const currentSeconds = current[0] * 60 + current[1];
-    const totalSeconds = total[0] * 60 + total[1];
-    return (currentSeconds / totalSeconds) * 100;
+    return total_time > 0 ? (currentTime / total_time) * 100 : 0;
   };
+
+  const toggleAudio = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.error('Audio playback error:', error);
+          });
+        }
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      const updateTime = () => setCurrentTime(audio.currentTime);
+      audio.addEventListener("timeupdate", updateTime);
+      return () => audio.removeEventListener("timeupdate", updateTime);
+    }
+  }, []);
 
   return (
     <div className="story-container">
@@ -46,9 +88,16 @@ const Storypage = () => {
 
       {/* Title Section */}
       <div className="title-section">
-        <h1 className="story-title">{storyData.title}</h1>
-        <p className="story-subtitle">{storyData.subtitle}</p>
+        <h1 className="story-title">{title}</h1>
+        <p className="story-subtitle">{subtitle}</p>
       </div>
+
+      {/* Audio Debug Info */}
+      {audioError && (
+        <div className="audio-error" style={{ color: 'red', margin: '10px' }}>
+          Audio Error: {audioError}
+        </div>
+      )}
 
       {/* Progress Bar */}
       <div className="progress-bar-container">
@@ -59,21 +108,26 @@ const Storypage = () => {
           />
         </div>
         <div className="time-display">
-          <span>{storyData.currentTime}</span>
-          <span>{storyData.totalTime}</span>
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(total_time)}</span>
         </div>
       </div>
 
-      {/* Animation Area */}
-      <div className="animation-area">
-        <div className="animation-placeholder">
-          Gif Animation Area + Who is speaking
-        </div>
-      </div>
+      {/* Play/Pause Button */}
+      <button className="play-button" onClick={toggleAudio}>
+        {isPlaying ? "Pause" : "Play"}
+      </button>
+
+      {/* Audio Element */}
+      <audio 
+        ref={audioRef} 
+        src={fullAudioUrl}
+        onLoadedMetadata={() => console.log('Audio metadata loaded')}
+      />
 
       {/* Story Text */}
       <div className="story-text-container">
-        {storyData.text.map((paragraph, index) => (
+        {text.split("\n").map((paragraph, index) => (
           <p key={index} className="story-paragraph">
             {paragraph}
           </p>
@@ -81,6 +135,13 @@ const Storypage = () => {
       </div>
     </div>
   );
+};
+
+// Helper function to format time
+const formatTime = (seconds) => {
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 };
 
 export default Storypage;

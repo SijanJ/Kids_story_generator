@@ -38,3 +38,10 @@ yarn-error.log*
 */.venv
 */env
 */.env
+
+backend/backend/output.mp3
+backend/backend/media/output.mp3
+backend/backend/story_backend/data
+backend/backend/story_backend/gpt2_model
+
+backend/src/app/
