@@ -6,7 +6,15 @@ const Inputpage = () => {
   const [isListening, setIsListening] = useState(false);
   const [storyText, setStoryText] = useState("");
   const [animation, setAnimation] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    // Add your generation logic here
+    // After generation is complete:
+
+    setIsGenerating(false);
+  };
 
   useEffect(() => {
     let animationFrame;
@@ -53,7 +61,17 @@ const Inputpage = () => {
         onChange={(e) => setStoryText(e.target.value)}
         placeholder="Type your story info here..."
       />
-
+      <button
+        className="generate-button"
+        onClick={handleGenerate}
+        disabled={!storyText.trim() || isGenerating}
+      >
+        {isGenerating ? (
+          <span className="loading-spinner">⌛</span>
+        ) : (
+          <>✨ Generate Story</>
+        )}
+      </button>
       <div className={`voice-input-section ${isListening ? "listening" : ""}`}>
         <button
           className="mic-button"

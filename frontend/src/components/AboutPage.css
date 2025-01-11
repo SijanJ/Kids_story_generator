@@ -1,0 +1,134 @@
+/* AboutPage.css */
+.about-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+
+h1 {
+  font-size: 2.5rem;
+  color: #ff6b6b;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  color: #ff9f7e;
+  margin-bottom: 30px;
+}
+
+.question-container {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.question {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.option-button {
+  background: #ff9f7e;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 15px 25px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.option-button:hover {
+  background: #ff8b6b;
+  transform: scale(1.02);
+}
+
+.option-label {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.option-subtext {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+.other-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.other-input {
+  width: 80%;
+  max-width: 400px;
+  padding: 12px;
+  border: 2px solid #ff9f7e;
+  border-radius: 25px;
+  font-size: 1rem;
+  text-align: center;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.other-input:focus {
+  outline: none;
+  border-color: #ff6b6b;
+  box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+}
+
+.submit-other-button {
+  margin-top: 15px;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.submit-other-button:hover {
+  background-color: #ff4a4a;
+  transform: scale(1.05);
+}
+
+.submit-other-button:disabled {
+  background-color: #ffd2d2;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mascot {
+  position: absolute;
+  right: 50px;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 300px;
+}
+
+@media (max-width: 768px) {
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mascot {
+    display: none;
+  }
+}
