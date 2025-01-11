@@ -7,6 +7,7 @@ import re
 import numpy as np
 import speech_recognition as sr
 from googletrans import Translator
+from openai import OpenAI
 from gtts import gTTS
 from playsound import playsound
 from time import sleep
@@ -284,25 +285,76 @@ def translate_text(text, target_language="ne"):
     print(f"Translated Text: {translated_text}")
     return translated_text
 
-def text_to_speech(text, target_language="en"):
+# def text_to_speech(text, target_language="en"):
+#     if not text:
+#         print("No text to convert to speech.")
+#         return None, 0
+
+#     # Generate the audio file
+#     tts = gTTS(text=text, lang=target_language)
+#     audio_file = "output.mp3"
+#     audio_path = os.path.join(MEDIA_ROOT, audio_file)
+#     tts.save(audio_path)
+
+#     # Calculate the duration of the audio file
+#     audio = AudioSegment.from_file(audio_path)
+#     duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
+
+#     # Return the URL and duration
+#     audio_url = os.path.join(settings.MEDIA_URL, audio_file)
+#     return audio_url, duration_seconds
+
+def text_to_speech(text, voice="nova"):
+    """
+    Convert text to speech using OpenAI's API with proper streaming
+    
+    Args:
+        text (str): The text to convert to speech
+        voice (str): The voice to use (alloy, echo, fable, onyx, nova, or shimmer)
+    
+    Returns:
+        tuple: (audio_url, duration_seconds)
+    """
     if not text:
         print("No text to convert to speech.")
         return None, 0
 
-    # Generate the audio file
-    tts = gTTS(text=text, lang=target_language)
-    audio_file = "output.mp3"
-    audio_path = os.path.join(MEDIA_ROOT, audio_file)
-    tts.save(audio_path)
-
-    # Calculate the duration of the audio file
-    audio = AudioSegment.from_file(audio_path)
-    duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
-
-    # Return the URL and duration
-    audio_url = os.path.join(settings.MEDIA_URL, audio_file)
-    return audio_url, duration_seconds
-
+    try:
+        # Initialize OpenAI client with API key directly
+        client = OpenAI(api_key='api-here')  # Replace with your actual API key
+        
+        # Generate the audio file using OpenAI's API
+        response = client.audio.speech.create(
+            model="tts-1",  # or "tts-1-hd" for higher quality
+            voice=voice,
+            input=text
+        )
+        
+        # Ensure media directory exists
+        os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+        
+        # Save the audio file
+        audio_file = "output.mp3"
+        audio_path = os.path.join(settings.MEDIA_ROOT, audio_file)
+        
+        # Stream and save the response using the correct method
+        with open(audio_path, 'wb') as file:
+            for chunk in response.iter_bytes():
+                file.write(chunk)
+        
+        # Calculate the duration of the audio file
+        audio = AudioSegment.from_file(audio_path)
+        duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
+        
+        # Construct the URL using Django's MEDIA_URL setting
+        audio_url = settings.MEDIA_URL + audio_file
+        
+        return audio_url, duration_seconds
+        
+    except Exception as e:
+        print(f"Error in text_to_speech: {str(e)}")
+        return None, 0
+    
 # if __name__ == "__main__":
 #     print("------------ HELLO! I am your personal bedtime story assitant ------------\n")
 #     print("--------------------------------------------------------------------------\n")
