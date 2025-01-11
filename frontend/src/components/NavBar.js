@@ -14,6 +14,11 @@ const NavBar = ({ onNavigate }) => {
       label: "Stories",
       path: "/story-mode",
     },
+    {
+      icon: <BookOpen className="nav-icon" />,
+      label: "Subscription",
+      path: "/pay",
+    },
   ];
 
   const handleNavClick = (path) => {

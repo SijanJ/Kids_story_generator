@@ -12,6 +12,7 @@ import Storypage from "./components/Storypage";
 import TopBar from "./components/TopBar"; // Add this import
 import NavBar from "./components/NavBar";
 import AboutPage from "./components/AboutPage";
+import Pay from "./components/SubscriptionPage";
 
 // Create a wrapper component to handle navigation
 const AppContent = () => {
@@ -30,6 +31,7 @@ const AppContent = () => {
           <Route path="/input" element={<Inputpage />} />
           <Route path="/story-mode" element={<Storypage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/pay" element={<Pay />} />
         </Routes>
       </div>
       <NavBar onNavigate={handleNavigation} />

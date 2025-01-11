@@ -1,0 +1,251 @@
+/* General Styles */
+body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #f7fafc;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Center the main content */
+.subscription-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.subscription-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.subscription-header h1 {
+    font-size: 2.5rem; /* Reduced font size */
+    color: #ff6347;
+    font-weight: 700;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.subscription-header p {
+    font-size: 1.2rem; /* Reduced font size */
+    color: #4b5563;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+.subscription-plans {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 2rem;
+}
+
+/* Subscription Plan Styles */
+.subscription-plan {
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 1rem;
+    border-radius: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.subscription-plan:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.subscription-plan img {
+    width: 150px; /* Reduced image size */
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.subscription-plan p {
+    margin-top: 1rem;
+    font-size: 1.3rem; /* Reduced font size */
+    color: #ff6347;
+    font-weight: bold;
+}
+
+.price {
+    margin-top: 0.5rem;
+    font-size: 1.2rem; /* Reduced font size */
+    font-weight: bold;
+    color: #4b5563;
+}
+
+/* Modal and Form Styling */
+.login-modal, .confirmation-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%; /* Reduced width */
+    max-width: 380px; /* Reduced max-width */
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 1.5rem; /* Reduced padding */
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    overflow-y: auto;
+}
+
+.login-form, .confirmation-form {
+    background-color: #ffffff;
+    width: 100%;
+    padding: 1.5rem; /* Reduced padding */
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-form h2, .confirmation-form h2 {
+    font-size: 2rem; /* Reduced font size */
+    color: #ff6347;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}
+
+.login-input, .confirmation-input {
+    width: 100%;
+    padding: 0.8rem; /* Reduced padding */
+    margin: 1rem 0;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem; /* Reduced font size */
+}
+
+.login-input:focus, .confirmation-input:focus {
+    border-color: #ff6347;
+    outline: none;
+}
+
+/* Captcha Section */
+.captcha-container {
+    margin-top: 1rem; /* Reduced margin */
+    text-align: left;
+}
+
+.captcha-text {
+    font-weight: bold;
+    color: #ff6347;
+}
+
+.captcha-input {
+    width: 100%;
+    padding: 0.8rem; /* Reduced padding */
+    margin-top: 0.5rem;
+    font-size: 1rem; /* Reduced font size */
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+/* OTP Section */
+.otp-container {
+    margin-top: 1rem; /* Reduced margin */
+    text-align: left;
+}
+
+.otp-text {
+    font-weight: bold;
+    color: #ff6347;
+}
+
+.otp-input {
+    width: 100%;
+    padding: 0.8rem; /* Reduced padding */
+    margin-top: 0.5rem;
+    font-size: 1rem; /* Reduced font size */
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+/* Error Message */
+.error-message {
+    color: #f87171;
+    font-size: 1rem; /* Reduced font size */
+    margin-top: 1rem;
+}
+
+/* Submit Button */
+.login-button, .confirmation-button {
+    width: 100%;
+    padding: 1rem;
+    background-color: #ff6347;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem; /* Reduced font size */
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    margin-top: 1.5rem;
+}
+
+.login-button:hover, .confirmation-button:hover {
+    background-color: #ff922b;
+    transform: scale(1.05);
+}
+
+.login-button:active, .confirmation-button:active {
+    transform: scale(0.95);
+}
+
+/* Close Button (X Icon) */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 2rem; /* Reduced font size */
+    color: #ff6347;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #ff922b;
+}
+
+.close-modal-btn {
+    background-color: #ff6347;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem; /* Reduced font size */
+    padding: 1rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.close-modal-btn:hover {
+    background-color: #ff922b;
+    transform: scale(1.05);
+}
+
+/* Responsive Styles */
+@media (max-width: 640px) {
+    .login-modal, .confirmation-modal {
+        width: 90%;
+        padding: 1rem;
+    }
+
+    .login-form, .confirmation-form {
+        padding: 1rem;
+        max-width: 100%;
+    }
+
+    .login-button, .confirmation-button {
+        font-size: 1.2rem;
+    }
+}
+
+.subscription-plan.disabled {
+    opacity: 0.5;
+    pointer-events: none; /* Prevent clicking */
+}

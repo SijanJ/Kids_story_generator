@@ -8,7 +8,7 @@ const Homepage = () => {
   const [currentFooterMessage, setCurrentFooterMessage] = useState(0);
 
   // Array of banner images
-  const images = ["Ad1.png", "Ad2.png", "Ad3.png"];
+  const images = ["child1.jpg", "child4.jpg", "child5.jpg"];
 
   // Array of footer messages
   const footerMessages = [
