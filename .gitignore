@@ -32,3 +32,7 @@ yarn-error.log*
 # models
 */gpt2_model
 */data
+
+# virtual environment
+*/venv
+*/.venv
