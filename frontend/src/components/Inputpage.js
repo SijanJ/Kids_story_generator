@@ -7,13 +7,91 @@ const Inputpage = () => {
   const [storyText, setStoryText] = useState("");
   const [animation, setAnimation] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+
   const navigate = useNavigate();
+
+  // Web Speech API setup
+  const recognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition
+      ? new (window.SpeechRecognition || window.webkitSpeechRecognition)()
+      : null;
+
+  useEffect(() => {
+    if (!recognition) {
+      console.error("Speech recognition API is not supported in this browser.");
+      return;
+    }
+
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "ne-NP";
+
+    const handleResult = (event) => {
+      let interimTranscript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          setStoryText((prev) => prev + transcript + " ");
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+    };
+
+    recognition.onresult = handleResult;
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      setIsListening(false);
+    };
+
+    if (isListening) {
+      recognition.start();
+    } else {
+      recognition.stop();
+    }
+
+    return () => {
+      recognition.stop();
+    };
+  }, [isListening]);
+
   const handleGenerate = async () => {
     setIsGenerating(true);
-    // Add your generation logic here
-    // After generation is complete:
-
-    setIsGenerating(false);
+  
+    try {
+      // Send the text to the backend
+      const response = await fetch("http://localhost:8080/api/generate-story/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: storyText }), // Send the recognized text
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json(); // Get the generated story and audio URL
+      console.log("Backend response:", data);
+  
+      // Navigate to Storypage with the generated story and audio
+      navigate("/story-mode", {
+        state: {
+          title: data.title,
+          subtitle: data.subtitle,
+          text: data.story,
+          audio_url: data.audio_url,
+          total_time: data.total_time, // Total duration of the audio in seconds
+        },
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while generating the story. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   useEffect(() => {
@@ -46,7 +124,6 @@ const Inputpage = () => {
         </svg>
         Back
       </button>
-
       <div className="header-section">
         <div className="magic-text">
           <span>💡</span> Let's make magic together!
@@ -54,7 +131,6 @@ const Inputpage = () => {
         <h1 className="main-title">Say Something About Your Story</h1>
         <p className="subtitle">✨ What's your story like?</p>
       </div>
-
       <textarea
         className="text-input"
         value={storyText}
@@ -79,7 +155,6 @@ const Inputpage = () => {
         >
           {isListening ? <span>■</span> : <span>🎤</span>}
         </button>
-
         {isListening && (
           <div className="voice-animation">
             <div className="voice-animation-bars">
@@ -97,7 +172,6 @@ const Inputpage = () => {
             </div>
           </div>
         )}
-
         <p className="status-text">
           {isListening ? "Listening..." : "Tap microphone to start recording"}
         </p>

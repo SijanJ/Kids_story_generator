@@ -1,11 +1,13 @@
 import torch
 import torch.nn as nn
+from pydub import AudioSegment
 from torch.utils.data import Dataset, DataLoader
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 import re
 import numpy as np
 import speech_recognition as sr
 from googletrans import Translator
+from openai import OpenAI
 from gtts import gTTS
 from playsound import playsound
 from time import sleep
@@ -13,7 +15,9 @@ import os
 import json
 import pygame
 import threading
-
+from django.conf import settings
+MEDIA_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media')
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 
 if torch.cuda.is_available():
@@ -23,13 +27,16 @@ else:
 print(f"Using {device_name}")
 device = device_name
 
-with open('../../vocabulary.json') as f:
+current_dir = os.path.dirname(os.path.abspath(__file__))
+vocabulary_path = os.path.join(current_dir, 'vocabulary.json')
+with open(vocabulary_path) as f:
     VOCABULARY = json.load(f)
 vocab_size = len(VOCABULARY)
 end_of_sentence = '.'
 
-model2 = GPT2LMHeadModel.from_pretrained("../../gpt2_model")
-tokenizer = GPT2Tokenizer.from_pretrained("../../gpt2_model")
+model_path = os.path.join(current_dir, 'gpt2_model')
+model2 = GPT2LMHeadModel.from_pretrained(model_path)
+tokenizer = GPT2Tokenizer.from_pretrained(model_path)
 # model2 = GPT2LMHeadModel.from_pretrained("gpt2")
 # tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 
@@ -95,8 +102,9 @@ class LSTM_model(nn.Module):
     def initHidden(self, device):
         return (torch.zeros(1, 1, num_hidden).to(device), torch.zeros(1, 1, num_hidden).to(device))
 
+data_path = os.path.join(current_dir, 'data')
 num_hidden = 128  # hyperparameter
-state_dict = torch.load("../../data/trained_lstm_title_model.pth", map_location=device, weights_only=True)
+state_dict = torch.load(data_path + "/trained_lstm_title_model.pth", map_location=device, weights_only=True)
 rnn = LSTM_model(vocab_size, num_hidden, vocab_size)
 rnn.load_state_dict(state_dict)
 rnn = rnn.to(device)
@@ -190,7 +198,8 @@ def complete_prompt(prompt, min_length=100, max_length=500, top_p=0.8, temperatu
     completed_story = tokenizer.decode(outputs[0], skip_special_tokens=True)
     return completed_story
 
-non_info_words = list(open("../../non_info_words.txt", "r", encoding='utf-8').read())
+non_info_words_path = os.path.join(current_dir, 'non_info_words.txt')
+non_info_words = list(open(non_info_words_path, "r", encoding='utf-8').read())
 
 
 def typewriter_effect(words, speed):
@@ -241,12 +250,12 @@ def generate_story(prompt):
     #print(completed_story)
     return (final_title, completed_story)
 
-def play_audio(file):
-    pygame.mixer.init()
-    pygame.mixer.music.load(file)
-    pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)
+# def play_audio(file):
+#     pygame.mixer.init()
+#     pygame.mixer.music.load(file)
+#     pygame.mixer.music.play()
+#     while pygame.mixer.music.get_busy():
+#         pygame.time.Clock().tick(10)
 
 def capture_speech():
     recognizer = sr.Recognizer()
@@ -276,41 +285,96 @@ def translate_text(text, target_language="ne"):
     print(f"Translated Text: {translated_text}")
     return translated_text
 
-def text_to_speech(text, target_language="en"):
-    if text is None:
+# def text_to_speech(text, target_language="en"):
+#     if not text:
+#         print("No text to convert to speech.")
+#         return None, 0
+
+#     # Generate the audio file
+#     tts = gTTS(text=text, lang=target_language)
+#     audio_file = "output.mp3"
+#     audio_path = os.path.join(MEDIA_ROOT, audio_file)
+#     tts.save(audio_path)
+
+#     # Calculate the duration of the audio file
+#     audio = AudioSegment.from_file(audio_path)
+#     duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
+
+#     # Return the URL and duration
+#     audio_url = os.path.join(settings.MEDIA_URL, audio_file)
+#     return audio_url, duration_seconds
+
+def text_to_speech(text, voice="nova"):
+    """
+    Convert text to speech using OpenAI's API with proper streaming
+    
+    Args:
+        text (str): The text to convert to speech
+        voice (str): The voice to use (alloy, echo, fable, onyx, nova, or shimmer)
+    
+    Returns:
+        tuple: (audio_url, duration_seconds)
+    """
+    if not text:
         print("No text to convert to speech.")
-        return
-    tts = gTTS(text=text, lang=target_language)
-    audio_file = "output.mp3"
-    tts.save(audio_file)
-    print("Playing the audio...")
-    # display(Audio(audio_file, autoplay=True))
-    # os.play(audio_file)
-    # playsound(audio_file)
-    audio_thread = threading.Thread(target=play_audio, args=("output.mp3",), daemon=True)
-    audio_thread.start()
+        return None, 0
 
+    try:
+        # Initialize OpenAI client with API key directly
+        client = OpenAI(api_key='api-here')  # Replace with your actual API key
+        
+        # Generate the audio file using OpenAI's API
+        response = client.audio.speech.create(
+            model="tts-1",  # or "tts-1-hd" for higher quality
+            voice=voice,
+            input=text
+        )
+        
+        # Ensure media directory exists
+        os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+        
+        # Save the audio file
+        audio_file = "output.mp3"
+        audio_path = os.path.join(settings.MEDIA_ROOT, audio_file)
+        
+        # Stream and save the response using the correct method
+        with open(audio_path, 'wb') as file:
+            for chunk in response.iter_bytes():
+                file.write(chunk)
+        
+        # Calculate the duration of the audio file
+        audio = AudioSegment.from_file(audio_path)
+        duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
+        
+        # Construct the URL using Django's MEDIA_URL setting
+        audio_url = settings.MEDIA_URL + audio_file
+        
+        return audio_url, duration_seconds
+        
+    except Exception as e:
+        print(f"Error in text_to_speech: {str(e)}")
+        return None, 0
+    
+# if __name__ == "__main__":
+#     print("------------ HELLO! I am your personal bedtime story assitant ------------\n")
+#     print("--------------------------------------------------------------------------\n")
+#     #prompt = capture_speech()
+#     prompt = "Once upon a time there lived a king"
+#     print("--------------------------------------------------------------------------\n")
+#     typewriter_effect("COMPLETING STORY", 0.05)
+#     typewriter_effect("... ...  ...        ... ...  ...\n", 0.05)
 
-if __name__ == "__main__":
-    print("------------ HELLO! I am your personal bedtime story assitant ------------\n")
-    print("--------------------------------------------------------------------------\n")
-    #prompt = capture_speech()
-    prompt = "Once upon a time there lived a king"
-    print("--------------------------------------------------------------------------\n")
-    typewriter_effect("COMPLETING STORY", 0.05)
-    typewriter_effect("... ...  ...        ... ...  ...\n", 0.05)
-
-    print("--------------------------------------------------------------------------\n")
-    print("--------------------------------------------------------------------------\n")
-    typewriter_effect("GENERATING TITLE", 0.05)
-    typewriter_effect("... ...  ...        ... ...  ...\n", 0.05)
-    story = generate_story(prompt)
-    '''story = ("The Hare and the Tortoise", """There was once a hare who was friends with a tortoise. One day, he challenged 
-        the tortoise to a race. Seeing how slow the tortoise was going, the hare thought he’d win this easily. So, he took 
-        a nap while the tortoise kept on going. When the hare woke, he saw that the tortoise was already at the finish line.
-         Much to his chagrin, the tortoise won the race while he was busy sleeping.""") '''
-    typewriter_effect(story[0], 0.1)
-    typewriter_effect("NARRATING", 0.1)
-    typewriter_effect("... ...  ...        ... ...  ...\n", 0.05)
-    text_to_speech(story[1])
-    typewriter_effect(story[1], 0.08)
+#     print("--------------------------------------------------------------------------\n")
+#     print("--------------------------------------------------------------------------\n")
+#     typewriter_effect("GENERATING TITLE", 0.05)
+#     typewriter_effect("... ...  ...        ... ...  ...\n", 0.05)
+#     story = generate_story(prompt)
+#     '''story = ("The Hare and the Tortoise", """There was once a hare who was friends with a tortoise. One day, he challenged 
+#         the tortoise to a race. Seeing how slow the tortoise was going, the hare thought he’d win this easily. So, he took 
+#         a nap while the tortoise kept on going. When the hare woke, he saw that the tortoise was already at the finish line.
+#          Much to his chagrin, the tortoise won the race while he was busy sleeping.""") '''
+#     typewriter_effect(story[0], 0.1)
+#     typewriter_effect("NARRATING", 0.1)
+#     typewriter_effect("... ...  ...        ... ...  ...\n", 0.05)
+#     text_to_speech(story[1])
+#     typewriter_effect(story[1], 0.08)
