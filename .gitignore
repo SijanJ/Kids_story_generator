@@ -36,3 +36,5 @@ yarn-error.log*
 # virtual environment
 */venv
 */.venv
+*/env
+*/.env
