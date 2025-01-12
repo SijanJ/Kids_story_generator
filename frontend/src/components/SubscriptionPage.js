@@ -42,7 +42,11 @@ const SubscriptionPage = () => {
 
   const plans = [
     { id: 1, name: "Unlimited Audio ", price: "Rs. 2000" },
-    { id: 2, name: "Unlimited Audio Visuals", price: "Rs. 3000" },
+    {
+      id: 2,
+      name: "Unlimited Audio Visuals",
+      price: subscribedPlans.includes(1) ? "Rs. 1000" : "Rs. 3000", // Dynamic price based on plan 1
+    },
     { id: 3, name: "Games", price: "Rs. 2000" },
   ];
 
@@ -72,6 +76,7 @@ const SubscriptionPage = () => {
     setIsOtpVisible(false); // Reset OTP visibility
     setErrorMessage(""); // Clear error message
     setUserOtp(""); // Clear OTP input
+
   };
 
   const handleCaptchaChange = (e) => {
@@ -141,8 +146,7 @@ const SubscriptionPage = () => {
 
     setIsOtpVisible(true);
     // Validate OTP only after it is filled
-    if(userOtp=="")
-    {
+    if (userOtp == "") {
       setErrorMessage("Please enter your OTP.");
       return;
     }
@@ -189,23 +193,26 @@ const SubscriptionPage = () => {
         {/* Display subscribed plan as badge */}
         {subscribedPlans.length > 0 && (
           <div className="badge">
-            Subscribed Plan: {plans.find(plan => plan.id === subscribedPlans[0]).name}
+            Subscribed Plan: {plans.find((plan) => plan.id === subscribedPlans[0]).name}
           </div>
         )}
       </div>
 
       <div className="subscription-plans">
-        {plans.map((plan) => (
-          <div
-            key={plan.id}
-            className={`subscription-plan ${subscribedPlans.includes(plan.id) ? 'disabled' : ''} plan-${plan.id}`}
-            onClick={() => handlePlanClick(plan)}
-          >
-            <p>{plan.name}</p>
-            <div className="price">{plan.price}</div>
-          </div>
-        ))}
-      </div>
+  {plans.map((plan) => (
+    <div
+      key={plan.id}
+      className={`subscription-plan 
+        ${subscribedPlans.includes(2) && (plan.id === 1 || plan.id === 2) || subscribedPlans.includes(plan.id) ? 'disabled' : ''} 
+        plan-${plan.id}`}
+      onClick={() => handlePlanClick(plan)}
+    >
+      <p>{plan.name}</p>
+      <div className="price">{plan.price}</div>
+    </div>
+  ))}
+</div>
+
 
       {/* Subscription Modal */}
       {showModal && (
