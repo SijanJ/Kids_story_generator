@@ -41,7 +41,10 @@ def text_to_speech(text, voice="nova"):
 
     try:
         # Initialize OpenAI client with API key directly
-        client = OpenAI(api_key='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')  # Replace with your actual API key
+        api_key = open("data/api_token.txt", "r").read().strip()
+        # print("API key: " + api_key)
+        # print( type(api_key))
+        client = OpenAI(api_key=api_key)  # Replace with your actual API key
         
         # Generate the audio file using OpenAI's API
         response = client.audio.speech.create(
@@ -109,3 +112,6 @@ def generate_story(prompt):
 
     title = "The proncess and Frog"
     return (title, completed_story)
+
+if __name__ == "__main__":
+    text_to_speech("Hello thee!")
