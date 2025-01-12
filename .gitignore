@@ -29,9 +29,8 @@ yarn-error.log*
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
-# models
-*/gpt2_model
-*/data
+
+backend/backend/story_backend/model
 
 # virtual environment
 */venv
@@ -43,7 +42,8 @@ backend/backend/output.mp3
 backend/backend/media/output.mp3
 backend/backend/story_backend/data
 backend/backend/story_backend/gpt2_model
-
+backend/backend/story_backend/test.py
+backend/backend/story_backend/requirements.txt
 backend/src/app/
 
 # API Key

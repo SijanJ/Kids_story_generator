@@ -20,8 +20,10 @@ def generate_story(request):
                 return JsonResponse({'error': 'No input provided'}, status=400)
 
             # Generate the story first
-            prompt = input_speech if input_speech else input_text
-            title, story = app.generate_story(prompt)
+            user_prompt = input_speech if input_speech else input_text
+            data = {'topic': user_prompt, 'word_count': 200}
+                    
+            title, story = app.generate_story(data)
 
             # Create result containers
             audio_result = {'url': None, 'time': 0}
