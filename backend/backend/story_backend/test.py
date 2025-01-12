@@ -1,34 +1,7 @@
-from pydub import AudioSegment
-from openai import OpenAI
-# from transformers import GPT2Tokenizer, GPT2LMHeadModel
-
-import re
-import torch
 from llama_cpp import Llama
 import random
-import multiprocessing
-import json
-import os
-from gtts import gTTS
+import  os, re, multiprocessing
 
-from .bingart import BingArt
-from django.conf import settings
-MEDIA_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media')
-os.makedirs(MEDIA_ROOT, exist_ok=True)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-model_path = os.path.join(current_dir, 'model', 'textgen.gguf')
-
-llm = Llama(model_path=model_path, 
-            n_gpu_layers=-1,
-            n_threads=multiprocessing.cpu_count(),
-            n_ctx=2048,
-            seed = -1,
-            verbose=True,
-            use_mmap=True,  # Uses memory mapping
-            use_mlock=False,
-            #stop=["The end."]
-            )
 
 children_story_topics = [
     "Wizards and Elephants", "Adventures in Magical Forest", "Talking Tree", "Brave Little Dragon",
@@ -103,6 +76,25 @@ moral = ["friendship", "diversity", "empathy", "respect", "courage", "honesty", 
          "kindness", "integrity"]
 
 
+model_directory = './model/'
+model_name = "textgen.gguf"
+llm = Llama(model_path=os.path.join(model_directory, model_name), 
+            n_gpu_layers=-1,
+            n_threads=multiprocessing.cpu_count(),
+            n_ctx=2048,
+            seed = -1,
+            verbose=True,
+            use_mmap=True,  # Uses memory mapping
+            use_mlock=False,
+            #stop=["The end."]
+            )
+
+
+def sanitize_filename(filename):
+    sanitized = re.sub(r'[\\/*?:"<>|]', "", filename)
+    sanitized = sanitized.replace(' ', '_')
+    return sanitized
+
 def generate_story(data):
     topic = data.get('topic', "").strip() or random.choice(children_story_topics)
     child_age = data.get('child_age', 2)
@@ -167,7 +159,7 @@ def generate_story(data):
         moral_lessons_prompt = f"The story should incorporate moral lesson(s) about the importance of {moral_lessons_string}."
                                                                    
     # Set initial prompt
-    # prompt_user = ""
+    prompt_user = ""
 
     prompt_initial = f"""    
         Develop a prompt that enables large language models to create engaging and age-appropriate stories for children in {language}.
@@ -235,123 +227,22 @@ def generate_story(data):
     TITLE = original_title
     TEXT = text
 
-    # sanitized_title = sanitize_filename(original_title)
-    
-    return (original_title, text)
-
-#OpenAI use garney bela matra
-
-# def text_to_speech(text, voice="nova"):
-#     """
-#     Convert text to speech using OpenAI's API with proper streaming
-    
-#     Args:
-#         text (str): The text to convert to speech
-#         voice (str): The voice to use (alloy, echo, fable, onyx, nova, or shimmer)
-    
-#     Returns:
-#         tuple: (audio_url, duration_seconds)
-#     """
-#     if not text:
-#         print("No text to convert to speech.")
-#         return None, 0
-
-#     try:
-#         # Initialize OpenAI client with API key directly
-#         api_path = os.path.join(current_dir, 'data', 'api_token.txt')
-#         api_key = open(api_path, "r").read().strip()
-#         # print("API key: " + api_key)
-#         # print( type(api_key))
-#         client = OpenAI(api_key=api_key)  # Replace with your actual API key
-        
-#         # Generate the audio file using OpenAI's API
-#         response = client.audio.speech.create(
-#             model="tts-1",  # or "tts-1-hd" for higher quality
-#             voice=voice,
-#             input=text
-#         )
-        
-#         # Ensure media directory exists
-#         os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
-        
-#         # Save the audio file
-#         audio_file = "output.mp3"
-#         audio_path = os.path.join(settings.MEDIA_ROOT, audio_file)
-        
-#         # Stream and save the response using the correct method
-#         with open(audio_path, 'wb') as file:
-#             for chunk in response.iter_bytes():
-#                 file.write(chunk)
-        
-#         # Calculate the duration of the audio file
-#         audio = AudioSegment.from_file(audio_path)
-#         duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
-        
-#         # Construct the URL using Django's MEDIA_URL setting
-#         audio_url = settings.MEDIA_URL + audio_file
-        
-#         return audio_url, duration_seconds
-        
-    # except Exception as e:
-    #     print(f"Error in text_to_speech: {str(e)}")
-    #     return None, 0
+    sanitized_title = sanitize_filename(original_title)
     
 
- # api key halna man lagena vane yo function use garum   
-def text_to_speech(text, target_language="en"):
-    if not text:
-        print("No text to convert to speech.")
-        return None, 0
+    return {
+        "success": True,
+        "title": original_title,
+        "sanitized_title": sanitized_title,
+        "language": "ENGLISH",
+        "text": TEXT,  
+    }
 
-    # Generate the audio file
-    tts = gTTS(text=text, lang=target_language)
-    audio_file = "output.mp3"
-    audio_path = os.path.join(MEDIA_ROOT, audio_file)
-    tts.save(audio_path)
-
-    # Calculate the duration of the audio file
-    audio = AudioSegment.from_file(audio_path)
-    duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
-
-    # Return the URL and duration
-    audio_url = os.path.join(settings.MEDIA_URL, audio_file)
-    return audio_url, duration_seconds
-
-
-def generate_story_image(story):
-    try:
-        bing_art = BingArt(auth_cookie_U='1bDW7Inh3p_mssSEXyb3FEAkS7Xv1SuUg6fUmScOU-wsY14AkmDC3rBgZ69Wq6BKM4S435ajBslX8QgY8ooce_T2zGkHVTOPN6l1JSQVX_PxSae4T58pQDbWJUQhNft8Fupp0F2K6bvQXigLPEbl3YZ8GO2QLfrXFSNdneDOUfm62qAgmkAZIDtweBfEfvh-gmDtfnlsIPkUGD5DQgNsiotg2NHsN5pzU-lkUHQnKUA0')
-        
-        # Create diverse prompts from the story
-        prompts = [
-            f"Children's storybook illustration style: {story[:100]}",
-            f"Magical fairytale style: {story[100:200]}",
-            # f"Watercolor painting style: {story[200:300]}",
-            # f"Cute cartoon style: {story[300:400]}",
-            # f"Fantasy art style: {story[400:500]}"
-        ]
-        
-        # Generate images
-        results = bing_art.generate_multiple_images(prompts)
-        
-        # Process results
-        processed_results = []
-        for result in results:
-            if 'images' in result and result['images']:
-                processed_results.append({
-                    'prompt': result['prompt'],
-                    'images': result['images']
-                })
-        
-        return processed_results
-        
-    except Exception as e:
-        logger.error(f"Error in generate_story_image: {e}")
-        return []
-    finally:
-        if 'bing_art' in locals():
-            bing_art.close_session()
-
-
-if __name__ == "__main__":
-    text_to_speech("Hello thee!")
+story = generate_story({
+    'topic': "king and a soldier",
+    'child_age': 4,
+    'word_count': 400,
+    'moral_lessons': ["courage", "honesty"],
+})
+# generate_and_save_story_image(story['sanitized_title'], story['text'])
+print(story)

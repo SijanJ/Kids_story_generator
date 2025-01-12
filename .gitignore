@@ -29,9 +29,8 @@ yarn-error.log*
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
-# models
-*/gpt2_model
-*/data
+
+backend/backend/story_backend/model
 
 # virtual environment
 */venv
