@@ -3,35 +3,39 @@ import { useNavigate } from "react-router-dom";
 import "./Inputpage.css";
 
 const Inputpage = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    storyText: "",
+    storyLength: "short",
+    storySettings: "",
+    language: "en",
+    age: "all",
+    imageStyle: "Storybook style",
+  });
   const [isListening, setIsListening] = useState(false);
-  const [storyText, setStoryText] = useState("");
-  const [animation, setAnimation] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const navigate = useNavigate();
-
-  // Web Speech API setup
   const recognition =
     window.SpeechRecognition || window.webkitSpeechRecognition
       ? new (window.SpeechRecognition || window.webkitSpeechRecognition)()
       : null;
 
   useEffect(() => {
-    if (!recognition) {
-      console.error("Speech recognition API is not supported in this browser.");
-      return;
-    }
+    if (!recognition) return;
 
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = "ne-NP";
+    recognition.lang = formData.language;
 
     const handleResult = (event) => {
       let interimTranscript = "";
       for (let i = 0; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          setStoryText((prev) => prev + transcript + " ");
+          setFormData((prev) => ({
+            ...prev,
+            storyText: prev.storyText + transcript + " ",
+          }));
         } else {
           interimTranscript += transcript;
         }
@@ -39,7 +43,6 @@ const Inputpage = () => {
     };
 
     recognition.onresult = handleResult;
-
     recognition.onerror = (event) => {
       console.error("Speech recognition error:", event.error);
       setIsListening(false);
@@ -51,16 +54,12 @@ const Inputpage = () => {
       recognition.stop();
     }
 
-    return () => {
-      recognition.stop();
-    };
-  }, [isListening]);
+    return () => recognition.stop();
+  }, [isListening, formData.language]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-
     try {
-      // Send the text to the backend
       const response = await fetch(
         "http://localhost:8080/api/generate-story/",
         {
@@ -68,20 +67,14 @@ const Inputpage = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ text: storyText }), // Send the recognized text
+          body: JSON.stringify(formData),
         }
       );
 
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`HTTP error! Status: ${response.status}`);
-      }
 
-      const data = await response.json(); // Get the generated story and audio URL
-      console.log("Backend response:", data);
-      console.log("\n");
-      console.log(data.image_url);
-
-      // Navigate to Storypage with the generated story and audio
+      const data = await response.json();
       navigate("/story-mode", {
         state: {
           title: data.title,
@@ -89,7 +82,7 @@ const Inputpage = () => {
           text: data.story,
           audio_url: data.audio_url,
           total_time: data.total_time,
-          images: data.images, // Array of image objects
+          images: data.images,
         },
       });
     } catch (error) {
@@ -100,87 +93,160 @@ const Inputpage = () => {
     }
   };
 
-  useEffect(() => {
-    let animationFrame;
-    if (isListening) {
-      const animate = () => {
-        setAnimation((prev) => (prev + 1) % 100);
-        animationFrame = requestAnimationFrame(animate);
-      };
-      animationFrame = requestAnimationFrame(animate);
-    }
-    return () => cancelAnimationFrame(animationFrame);
-  }, [isListening]);
-
   return (
     <div className="story-input-container">
-      <button className="back-button" onClick={() => navigate("/")}>
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        Back
-      </button>
-      <div className="header-section">
-        <div className="magic-text">
-          <span>💡</span> Let's make magic together!
-        </div>
-        <h1 className="main-title">Say Something About Your Story</h1>
-        <p className="subtitle">✨ What's your story like?</p>
+      <div className="magic-text">
+        <span>💡</span> Let's make magic together!
       </div>
-      <textarea
-        className="text-input"
-        value={storyText}
-        onChange={(e) => setStoryText(e.target.value)}
-        placeholder="Type your story info here..."
-      />
-      <button
-        className="generate-button"
-        onClick={handleGenerate}
-        disabled={!storyText.trim() || isGenerating}
-      >
-        {isGenerating ? (
-          <span className="loading-spinner">⌛</span>
-        ) : (
-          <>✨ Generate Story</>
-        )}
-      </button>
-      <div className={`voice-input-section ${isListening ? "listening" : ""}`}>
-        <button
-          className="mic-button"
-          onClick={() => setIsListening(!isListening)}
-        >
-          {isListening ? <span>■</span> : <span>🎤</span>}
-        </button>
+
+      <div className="app-header">
+        <h1 className="app-title">AI Story Generator</h1>
+      </div>
+
+      <div className="input-section">
+        <div className="textarea-wrapper">
+          <textarea
+            className="text-input"
+            value={formData.storyText}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, storyText: e.target.value }))
+            }
+            placeholder="Describe your topic..."
+          />
+          <button
+            className="mic-button"
+            onClick={() => setIsListening(!isListening)}
+            aria-label="Toggle voice input"
+          >
+            {isListening ? <span>■</span> : <span>🎤</span>}
+          </button>
+        </div>
+
         {isListening && (
-          <div className="voice-animation">
-            <div className="voice-animation-bars">
-              {[...Array(12)].map((_, i) => (
-                <div
-                  key={i}
-                  className="animation-bar"
-                  style={{
-                    height: `${
-                      20 + Math.sin((animation + i * 30) * 0.1) * 20
-                    }px`,
-                  }}
-                />
-              ))}
+          <div className="listening-indicator">
+            <div className="listening-text">Listening...</div>
+            <div className="listening-dots">
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
           </div>
         )}
-        <p className="status-text">
-          {isListening ? "Listening..." : "Tap microphone to start recording"}
-        </p>
+      </div>
+
+      <div className="settings-section">
+        <div className="select-row">
+          <div className="select-group">
+            <label className="select-label">Language</label>
+            <div className="select-wrapper">
+              <select
+                className="select-dropdown"
+                value={formData.language}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, language: e.target.value }))
+                }
+              >
+                <option value="en">English</option>
+                <option value="ne">नेपाली</option>
+              </select>
+              <span className="dropdown-arrow">▼</span>
+            </div>
+          </div>
+
+          <div className="select-group">
+            <label className="select-label">Story Length</label>
+            <div className="select-wrapper">
+              <select
+                className="select-dropdown"
+                value={formData.storyLength}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    storyLength: e.target.value,
+                  }))
+                }
+              >
+                <option value="short">Short</option>
+                <option value="medium">Medium</option>
+                <option value="long">Long</option>
+              </select>
+              <span className="dropdown-arrow">▼</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="select-row">
+          <div className="select-group">
+            <label className="select-label">Age Group</label>
+            <div className="select-wrapper">
+              <select
+                className="select-dropdown"
+                value={formData.age}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, age: e.target.value }))
+                }
+              >
+                <option value="all">All Ages</option>
+                <option value="0-2">0-2</option>
+                <option value="2-5">2-5</option>
+                <option value="5-7">5-7</option>
+                <option value="7-12">7-12</option>
+              </select>
+              <span className="dropdown-arrow">▼</span>
+            </div>
+          </div>
+
+          <div className="select-group">
+            <label className="select-label">Image Style</label>
+            <div className="select-wrapper">
+              <select
+                className="select-dropdown"
+                value={formData.imageStyle}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    imageStyle: e.target.value,
+                  }))
+                }
+              >
+                <option value="Children's storybook illustration">
+                  Storybook Style
+                </option>
+                <option value="Magical fairytale style">
+                  Magical fairytale style
+                </option>
+                <option value="Watercolor painting style">Watercolor</option>
+                <option value="pixel">Pixel Art</option>
+                <option value="Cute cartoon style">Cartoon</option>
+                <option value="Fantasy art style">Fantasy</option>
+              </select>
+              <span className="dropdown-arrow">▼</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="input-group">
+          <label className="input-label">Story Settings</label>
+          <textarea
+            className="text-input settings-input"
+            value={formData.storySettings}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                storySettings: e.target.value,
+              }))
+            }
+            placeholder="Describe the setting (e.g., in a magical jungle, on a distant planet...)"
+          />
+        </div>
+
+        <button
+          className="generate-button"
+          onClick={handleGenerate}
+          disabled={!formData.storyText.trim() || isGenerating}
+        >
+          {isGenerating ? "Creating magic... ⌛" : "Generate Story ✨"}
+        </button>
       </div>
     </div>
   );
