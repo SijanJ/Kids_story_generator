@@ -24,7 +24,7 @@ llm = Llama(model_path=model_path,
             n_threads=multiprocessing.cpu_count(),
             n_ctx=2048,
             seed = -1,
-            verbose=True,
+            verbose=False,
             use_mmap=True,  # Uses memory mapping
             use_mlock=False,
             #stop=["The end."]
@@ -101,18 +101,29 @@ age_groups_authors = {
 
 moral = ["friendship", "diversity", "empathy", "respect", "courage", "honesty", "teamwork", 
          "kindness", "integrity"]
-
+# storyTopic: "", // New field for story topic
+#     storyText: "",
+#     storyLength: "short",
+#     storySettings: "",
+#     language: "en",
+#     age: "all",
+#     imageStyle: "Storybook style",
 
 def generate_story(data):
-    topic = data.get('topic', "").strip() or random.choice(children_story_topics)
-    child_age = data.get('child_age', 2)
-    word_count = data.get('word_count')
-    language_name = data.get('language_name', 'English')
+    topic = data.get('storyTopic', "").strip() or random.choice(children_story_topics)
+    age_range = data.get('age', 0)
+    story_length = data.get('storyLength', 'short')
     user_main_character = data.get('main_character', "").strip()
-    user_setting = data.get('setting', "").strip()
-    prompt_user = data.get('user_prompt', "").strip()
+    user_setting = data.get('storySettings', "").strip()
+    prompt_user = data.get('storyText', "").strip()
     selected_moral_lessons = data.get('moral_lessons', [])
 
+    if story_length == "short":
+        word_count = 150
+    elif story_length == "medium":
+        word_count = 300
+    elif story_length == "long":
+        word_count = 500
     # Use user's input for main character if provided, otherwise randomly select from the list
     story_main_character = user_main_character if user_main_character else random.choice(main_character)
 
@@ -128,19 +139,14 @@ def generate_story(data):
 
     # Determine the age range and authors based on child_age
 
-    if 0<= child_age <= 2:
-        age_range = "0-2"
-    elif 2 < child_age <= 5:
-        age_range = "2-5"
-    elif 5 < child_age <= 7:
-        age_range = "5-7"
-    else:
-        age_range = "7-12"
+    age_ranges = ["0-2", "2-5", "5-7", "7-12"]
+    if age_range == "all":
+        age_range = random.choice(age_ranges)
     authors = age_groups_authors[age_range]
     selected_author = random.choice(authors)
 
     # Use the full language name for the story generation
-    language = language_name
+    language = "English" 
 
     # Generate a title
     title_prompt = f"Generate a title for a story about {topic} in {language} with a maximum of 6 words and no special characters or asterisks."
@@ -173,10 +179,10 @@ def generate_story(data):
         Develop a prompt that enables large language models to create engaging and age-appropriate stories for children in {language}.
         Generate an enhanced prompt with the following key points and do not ignore these: 
         - Generate an entire story with approximately {word_count} words for children aged {age_range} about {topic} with a playful tone and narrative writing style like {selected_author}. 
-        - {prompt_user}
         - Start with a meaningful title: {title}
         - The main character is {story_main_character}. 
         - The story takes place {story_setting}.  
+        - The story text may contain the following text {prompt_user}
         - The story should be set in a world that is both familiar and unknown to the child reader. 
         - The story should incorporate a moral lesson about the importance of {moral_lessons_prompt}.
         -  {format_control}
@@ -399,14 +405,14 @@ def text_to_speech(text, voice="nova"):
         return None, 0
 
 
-def generate_story_image(story):
+def generate_story_image(story, image_style):
     try:
         bing_art = BingArt(auth_cookie_U='1bDW7Inh3p_mssSEXyb3FEAkS7Xv1SuUg6fUmScOU-wsY14AkmDC3rBgZ69Wq6BKM4S435ajBslX8QgY8ooce_T2zGkHVTOPN6l1JSQVX_PxSae4T58pQDbWJUQhNft8Fupp0F2K6bvQXigLPEbl3YZ8GO2QLfrXFSNdneDOUfm62qAgmkAZIDtweBfEfvh-gmDtfnlsIPkUGD5DQgNsiotg2NHsN5pzU-lkUHQnKUA0')
         
         # Create diverse prompts from the story
         prompts = [
-            f"Children's storybook illustration style: {story[:100]}",
-            f"Magical fairytale style: {story[100:200]}",
+            f"{image_style}: {story[:100]}",
+            f"{image_style}: {story[100:200]}",
             # f"Watercolor painting style: {story[200:300]}",
             # f"Cute cartoon style: {story[300:400]}",
             # f"Fantasy art style: {story[400:500]}"

@@ -5,6 +5,7 @@ import "./Inputpage.css";
 const Inputpage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    storyTopic: "", // New field for story topic
     storyText: "",
     storyLength: "short",
     storySettings: "",
@@ -104,6 +105,20 @@ const Inputpage = () => {
       </div>
 
       <div className="input-section">
+        {/* New Story Topic Input */}
+        <div className="input-group">
+          <label className="input-label">Story Topic</label>
+          <input
+            type="text"
+            className="text-input"
+            value={formData.storyTopic}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, storyTopic: e.target.value }))
+            }
+            placeholder="Enter the main topic of your story..."
+          />
+        </div>
+
         <div className="textarea-wrapper">
           <textarea
             className="text-input"
@@ -111,7 +126,7 @@ const Inputpage = () => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, storyText: e.target.value }))
             }
-            placeholder="Describe your topic..."
+            placeholder="Describe your story in detail..."
           />
           <button
             className="mic-button"

@@ -49,3 +49,6 @@ backend/src/app/
 # API Key
 */api_token.txt
 */backend/backend/backend/api_token.txt
+
+# Cache 
+*/__pycache__/

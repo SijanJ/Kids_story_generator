@@ -14,15 +14,11 @@ def generate_story(request):
         try:
             data = json.loads(request.body)
             input_text = data.get('text', '')
-            input_speech = data.get('speech', '')
             
-            if not input_text and not input_speech:
+            if not input_text:
                 return JsonResponse({'error': 'No input provided'}, status=400)
-
-            # Generate the story first
-            user_prompt = input_speech if input_speech else input_text
-            data = {'topic': user_prompt, 'word_count': 200}
-                    
+            image_style = data.get('imageStyle', 'Storybook style')
+            
             title, story = app.generate_story(data)
 
             # Create result containers
@@ -40,7 +36,7 @@ def generate_story(request):
             def generate_images():
                 try:
                     # Get image results
-                    image_urls = app.generate_story_image(story)
+                    image_urls = app.generate_story_image(story, image_style)
                     
                     # Process each image result
                     for result in image_urls:
