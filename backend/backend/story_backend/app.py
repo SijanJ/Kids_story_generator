@@ -9,7 +9,9 @@ import random
 import multiprocessing
 import json
 import os
+# from googletrans import Translator
 from gtts import gTTS
+from deep_translator import GoogleTranslator
 
 from .bingart import BingArt
 from django.conf import settings
@@ -24,7 +26,7 @@ llm = Llama(model_path=model_path,
             n_threads=multiprocessing.cpu_count(),
             n_ctx=2048,
             seed = -1,
-            verbose=False,
+            verbose=True,
             use_mmap=True,  # Uses memory mapping
             use_mlock=False,
             #stop=["The end."]
@@ -109,6 +111,10 @@ moral = ["friendship", "diversity", "empathy", "respect", "courage", "honesty", 
 #     age: "all",
 #     imageStyle: "Storybook style",
 
+def translate_text_googletrans(text, source_language="en", target_language="ne"):
+    result = GoogleTranslator(source=source_language, target=target_language).translate(text)
+    return result
+
 def generate_story(data):
     topic = data.get('storyTopic', "").strip() or random.choice(children_story_topics)
     age_range = data.get('age', 0)
@@ -117,6 +123,7 @@ def generate_story(data):
     user_setting = data.get('storySettings', "").strip()
     prompt_user = data.get('storyText', "").strip()
     selected_moral_lessons = data.get('moral_lessons', [])
+    translation = data.get('language', 'en')
 
     if story_length == "short":
         word_count = 150
@@ -242,8 +249,13 @@ def generate_story(data):
     TEXT = text
 
     # sanitized_title = sanitize_filename(original_title)
+    if translation == "en":
+        return (original_title, text)
     
-    return (original_title, text)
+    else:
+        translated_title = translate_text_googletrans(original_title, source_language="en", target_language="ne")
+        translated_text = translate_text_googletrans(text, source_language="en", target_language="ne")
+        return (translated_title, translated_text)
 
 #OpenAI use garney bela matra
 
@@ -298,30 +310,130 @@ def generate_story(data):
         
 #         return audio_url, duration_seconds
         
-    # except Exception as e:
-    #     print(f"Error in text_to_speech: {str(e)}")
-    #     return None, 0
+#     except Exception as e:
+#         print(f"Error in text_to_speech: {str(e)}")
+#         return None, 0
+
+def text_to_speech(text, voice="nova"):
+    """
+    Convert text to speech with background music and proper timing control.
+    """
+    if not text:
+        print("No text to convert to speech")
+        return None, 0
+
+    # Intro and outro text with consistent timing
+    intro = ("<break time='3s'/> Twinkle twinkle little stars <break time='1s'/> "
+         "It's your StoryPal, back with another special story. <break time='1s'/> "
+         "Get cozy under your blanket <break time='1s'/> "
+         "as we journey into a world of imagination <break time='5s'/>")
+
+    outro = ("<break time='6s'/> Stars are twinkling, "
+            "saying goodnight <break time='1s'/> "
+            "This is your StoryPal, <break time='1s'/> "
+            "watching over your dreams until next time <break time='5s'/>")
+
+    # Function to add pauses after sentences in main text
+    def add_timing_to_main_text(text):
+        # Add breaks after punctuation marks
+        text = text.replace(". ", ". <break time='0.8s'/> ")
+        text = text.replace("! ", "! <break time='1s'/> ")
+        text = text.replace("? ", "? <break time='1s'/> ")
+        text = text.replace("... ", "... <break time='1.2s'/> ")
+        return text
+
+    # Combine all parts with timing
+    full_text = f"{intro}{add_timing_to_main_text(text)}{outro}"
+
+    try:
+        # Initialize OpenAI client with API key
+        api_path = os.path.join(current_dir, 'data', 'api_token.txt')
+        api_key = open(api_path, "r").read().strip()
+        client = OpenAI(api_key=api_key)
+        
+        # Generate the narration audio
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice=voice,
+            input=full_text
+        )
+        
+        #os.makedirs(output_dir, exist_ok=True)
+        narration_file = "narration.mp3"
+        narration_path = os.path.join(settings.MEDIA_ROOT, narration_file)
+        with open(narration_path, 'wb') as file:
+            for chunk in response.iter_bytes():
+                file.write(chunk)
+
+        narration = AudioSegment.from_file(narration_path)
+        bg_music_path = os.path.join(settings.MEDIA_ROOT, "background_music.mp3")
+        background_music = AudioSegment.from_mp3(bg_music_path)
+
+        # Lower background music volume (reduce by 25dB)
+        background_music = background_music - 25
+
+        # Add 8 seconds of silence at the start of narration
+        intro_silence = AudioSegment.silent(duration=5000)  # 5 seconds of silence
+        ontro_silence = AudioSegment.silent(duration=8000) # 8 seconds of silence
+        narration = intro_silence + narration + ontro_silence
+
+        # Loop background music if shorter, trim if longer
+        while len(background_music) < len(narration):
+                background_music += background_music
+        background_music = background_music[:len(narration) + 16000]  # Add extra 16s for fade in/out
+
+        # Gradual fade-down after 8 seconds
+        fade_down_start = 5000  # Start fading down after 5 seconds
+        fade_down_duration = len(narration) - 5000  # Fade duration spans until narration ends
+        background_music = background_music.fade(to_gain=-35, start=fade_down_start, duration=fade_down_duration)
+
+        # Gradual volume restoration and fade-out after narration ends
+        fade_up_start = len(narration) -len(ontro_silence) # Start restoring volume after narration ends
+        fade_up_duration = 3000  # Restore volume over 8 seconds
+        fade_out_duration = 5000  # Fade out completely over 5 seconds
+        background_music = background_music.fade(to_gain=0, start=fade_up_start, duration=fade_up_duration)
+        background_music = background_music.fade_out(duration=fade_out_duration)
+
+        # Overlay narration and background music
+        final_audio = narration.overlay(background_music)
+
+        # Export the final mixed audio
+        # final_path = os.path.join(output_dir, "final_output.mp3")
+        final_audio_file = "final_output.mp3"
+        final_path = os.path.join(settings.MEDIA_ROOT, final_audio_file)
+        final_audio.export(final_path, format="mp3")
+
+        # Return the final audio file path and its duration
+        duration_seconds = len(final_audio) / 1000
+
+        audio_url = settings.MEDIA_URL + final_audio_file
+
+        return audio_url, duration_seconds
+
+    except Exception as e:
+        print(f"Error in text_to_speech_with_bg_music: {str(e)}")
+        return None, 0
     
 
  # api key halna man lagena vane yo function use garum   
-def text_to_speech(text, target_language="en"):
-    if not text:
-        print("No text to convert to speech.")
-        return None, 0
+# def text_to_speech(text, target_language="en"):
+#     if not text:
+#         print("No text to convert to speech.")
+#         return None, 0
 
-    # Generate the audio file
-    tts = gTTS(text=text, lang=target_language)
-    audio_file = "output.mp3"
-    audio_path = os.path.join(MEDIA_ROOT, audio_file)
-    tts.save(audio_path)
+#     # Generate the audio file
+#     tts = gTTS(text=text, lang=target_language)
+#     audio_file = "output.mp3"
+#     audio_path = os.path.join(MEDIA_ROOT, audio_file)
+#     tts.save(audio_path)
 
-    # Calculate the duration of the audio file
-    audio = AudioSegment.from_file(audio_path)
-    duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
+#     # Calculate the duration of the audio file
+#     audio = AudioSegment.from_file(audio_path)
+#     duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
 
-    # Return the URL and duration
-    audio_url = os.path.join(settings.MEDIA_URL, audio_file)
-    return audio_url, duration_seconds
+#     # Return the URL and duration
+#     audio_url = os.path.join(settings.MEDIA_URL, audio_file)
+#     return audio_url, duration_seconds
 
 
 def generate_story_image(story, image_style):
