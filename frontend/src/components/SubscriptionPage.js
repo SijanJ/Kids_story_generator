@@ -76,7 +76,6 @@ const SubscriptionPage = () => {
     setIsOtpVisible(false); // Reset OTP visibility
     setErrorMessage(""); // Clear error message
     setUserOtp(""); // Clear OTP input
-
   };
 
   const handleCaptchaChange = (e) => {
@@ -168,7 +167,7 @@ const SubscriptionPage = () => {
 
   // Handle confirmation modal submission
   const handleConfirmSubscription = () => {
-    if (!username || !email || !mpin) {
+    if (!email || !mpin) {
       setErrorMessage("Please fill in all fields.");
       return;
     }
@@ -199,20 +198,19 @@ const SubscriptionPage = () => {
       </div>
 
       <div className="subscription-plans">
-  {plans.map((plan) => (
-    <div
-      key={plan.id}
-      className={`subscription-plan 
-        ${subscribedPlans.includes(2) && (plan.id === 1 || plan.id === 2) || subscribedPlans.includes(plan.id) ? 'disabled' : ''} 
-        plan-${plan.id}`}
-      onClick={() => handlePlanClick(plan)}
-    >
-      <p>{plan.name}</p>
-      <div className="price">{plan.price}</div>
-    </div>
-  ))}
-</div>
-
+        {plans.map((plan) => (
+          <div
+            key={plan.id}
+            className={`subscription-plan 
+              ${subscribedPlans.includes(2) && (plan.id === 1 || plan.id === 2) || subscribedPlans.includes(plan.id) ? 'disabled' : ''} 
+              plan-${plan.id}`}
+            onClick={() => handlePlanClick(plan)}
+          >
+            <p>{plan.name}</p>
+            <div className="price">{plan.price}</div>
+          </div>
+        ))}
+      </div>
 
       {/* Subscription Modal */}
       {showModal && (
@@ -220,6 +218,15 @@ const SubscriptionPage = () => {
           <div className="login-form">
             <div className="close-btn" onClick={closeModal}>X</div>
             <h2>Login to Subscribe</h2>
+
+            {/* Add payment gateway icon */}
+            <div className="payment-gateway-icon">
+              <img
+                src="./icon.jpg" // Use the actual URL of the payment gateway icon
+                alt="Payment Gateway"
+                className="payment-icon"
+              />
+            </div>
 
             {selectedPlan && (
               <div className="plan-price">
@@ -302,19 +309,19 @@ const SubscriptionPage = () => {
             <div className="close-btn" onClick={closeModal}>X</div>
             <h2>Confirm Subscription</h2>
 
+            {/* Plan Price Field */}
             <div className="login-field">
-              <label className="login-label">Username</label>
+              <label className="confirmation-label">Price</label>
               <input
                 className="confirmation-input"
                 type="text"
-                placeholder="Enter your username"
-                value={username}
-                onChange={handleUsernameChange}
+                value={selectedPlan ? selectedPlan.price : 'N/A'} // Set the price here
+                readOnly
               />
             </div>
 
             <div className="login-field">
-              <label className="login-label">Email</label>
+              <label className="confirmation-label">Email</label>
               <input
                 className="confirmation-input"
                 type="email"
@@ -325,7 +332,7 @@ const SubscriptionPage = () => {
             </div>
 
             <div className="login-field">
-              <label className="login-label">MPIN</label>
+              <label className="confirmation-label">MPIN</label>
               <input
                 className="confirmation-input"
                 type="password"
