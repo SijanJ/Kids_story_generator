@@ -58,24 +58,29 @@ const Inputpage = () => {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-  
+
     try {
       // Send the text to the backend
-      const response = await fetch("http://localhost:8080/api/generate-story/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: storyText }), // Send the recognized text
-      });
-  
+      const response = await fetch(
+        "http://localhost:8080/api/generate-story/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: storyText }), // Send the recognized text
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
+
       const data = await response.json(); // Get the generated story and audio URL
       console.log("Backend response:", data);
-  
+      console.log("\n");
+      console.log(data.image_url);
+
       // Navigate to Storypage with the generated story and audio
       navigate("/story-mode", {
         state: {
@@ -83,7 +88,8 @@ const Inputpage = () => {
           subtitle: data.subtitle,
           text: data.story,
           audio_url: data.audio_url,
-          total_time: data.total_time, // Total duration of the audio in seconds
+          total_time: data.total_time,
+          images: data.images, // Array of image objects
         },
       });
     } catch (error) {

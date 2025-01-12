@@ -7,48 +7,83 @@ const Storypage = () => {
   const location = useLocation();
 
   // Get the passed story data
-  const { title, subtitle, text, audio_url, total_time } = location.state || {
-    title: "Default Story Title",
-    subtitle: "Default Subtitle",
-    text: "No story text provided.",
-    audio_url: "",
-    total_time: 0,
-  };
+  const { title, subtitle, text, audio_url, total_time, images } =
+    location.state || {
+      title: "Default Story Title",
+      subtitle: "Default Subtitle",
+      text: "No story text provided.",
+      audio_url: "",
+      total_time: 0,
+      images: [],
+    };
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [audioError, setAudioError] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const audioRef = useRef(null);
+  const imageTransitionInterval = useRef(null);
 
   // Construct full audio URL if it's a relative path
-  const fullAudioUrl = audio_url.startsWith('http') 
-    ? audio_url 
+  const fullAudioUrl = audio_url.startsWith("http")
+    ? audio_url
     : `http://localhost:8080${audio_url}`;
 
+  // Handle image transitions
   useEffect(() => {
-    console.log('Audio URL:', fullAudioUrl); // Debug log
-    
-    if (audioRef.current) {
-      audioRef.current.addEventListener('error', (e) => {
-        console.error('Audio error:', e);
-        setAudioError(e.message);
-      });
-    }
-  }, [fullAudioUrl]);
+    if (isPlaying && images?.length > 0) {
+      // Calculate transition interval based on total audio time
+      const intervalTime = (total_time * 1000) / images.length;
 
-  const calculateProgress = () => {
-    return total_time > 0 ? (currentTime / total_time) * 100 : 0;
-  };
+      imageTransitionInterval.current = setInterval(() => {
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === images.length - 1 ? 0 : prevIndex + 1
+        );
+      }, intervalTime);
+    }
+
+    return () => {
+      if (imageTransitionInterval.current) {
+        clearInterval(imageTransitionInterval.current);
+      }
+    };
+  }, [isPlaying, images, total_time]);
+
+  // Audio event listeners
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (audio) {
+      const updateTime = () => setCurrentTime(audio.currentTime);
+      audio.addEventListener("timeupdate", updateTime);
+
+      audio.addEventListener("ended", () => {
+        setIsPlaying(false);
+        setCurrentImageIndex(0);
+        if (imageTransitionInterval.current) {
+          clearInterval(imageTransitionInterval.current);
+        }
+      });
+
+      return () => {
+        audio.removeEventListener("timeupdate", updateTime);
+        audio.removeEventListener("ended", () => {});
+      };
+    }
+  }, []);
 
   const toggleAudio = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        if (imageTransitionInterval.current) {
+          clearInterval(imageTransitionInterval.current);
+        }
       } else {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error('Audio playback error:', error);
+          playPromise.catch((error) => {
+            console.error("Audio playback error:", error);
           });
         }
       }
@@ -56,18 +91,8 @@ const Storypage = () => {
     }
   };
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      const updateTime = () => setCurrentTime(audio.currentTime);
-      audio.addEventListener("timeupdate", updateTime);
-      return () => audio.removeEventListener("timeupdate", updateTime);
-    }
-  }, []);
-
   return (
     <div className="story-container">
-      {/* Back Button */}
       <button className="back-button" onClick={() => navigate("/")}>
         <svg
           width="24"
@@ -86,25 +111,40 @@ const Storypage = () => {
         Back
       </button>
 
-      {/* Title Section */}
+      {/* Image Carousel */}
+      <div className="image-carousel">
+        {images && images.length > 0 && (
+          <div className="image-container">
+            <img
+              src={images[currentImageIndex]?.url}
+              alt={`Story illustration ${currentImageIndex + 1}`}
+              className="story-image"
+            />
+            <div className="image-indicators">
+              {images.map((_, index) => (
+                <div
+                  key={index}
+                  className={`indicator ${
+                    index === currentImageIndex ? "active" : ""
+                  }`}
+                  onClick={() => setCurrentImageIndex(index)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="title-section">
         <h1 className="story-title">{title}</h1>
         <p className="story-subtitle">{subtitle}</p>
       </div>
 
-      {/* Audio Debug Info */}
-      {audioError && (
-        <div className="audio-error" style={{ color: 'red', margin: '10px' }}>
-          Audio Error: {audioError}
-        </div>
-      )}
-
-      {/* Progress Bar */}
       <div className="progress-bar-container">
         <div className="progress-bar">
           <div
             className="progress-fill"
-            style={{ width: `${calculateProgress()}%` }}
+            style={{ width: `${(currentTime / total_time) * 100}%` }}
           />
         </div>
         <div className="time-display">
@@ -113,19 +153,16 @@ const Storypage = () => {
         </div>
       </div>
 
-      {/* Play/Pause Button */}
       <button className="play-button" onClick={toggleAudio}>
         {isPlaying ? "Pause" : "Play"}
       </button>
 
-      {/* Audio Element */}
-      <audio 
-        ref={audioRef} 
+      <audio
+        ref={audioRef}
         src={fullAudioUrl}
-        onLoadedMetadata={() => console.log('Audio metadata loaded')}
+        onLoadedMetadata={() => console.log("Audio metadata loaded")}
       />
 
-      {/* Story Text */}
       <div className="story-text-container">
         {text.split("\n").map((paragraph, index) => (
           <p key={index} className="story-paragraph">
@@ -137,7 +174,6 @@ const Storypage = () => {
   );
 };
 
-// Helper function to format time
 const formatTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);

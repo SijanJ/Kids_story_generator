@@ -45,3 +45,7 @@ backend/backend/story_backend/data
 backend/backend/story_backend/gpt2_model
 
 backend/src/app/
+
+# API Key
+*/api_token.txt
+*/backend/backend/backend/api_token.txt
