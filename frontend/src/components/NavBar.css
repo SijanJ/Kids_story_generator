@@ -1,22 +1,21 @@
-/* NavBar.css */
 .navbar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background-color: white;
+  height: 70px;
+  background: #fff7e6; /* Off-white with an orangish tint */
   z-index: 50;
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-  padding: 0 16px;
+  justify-content: center;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0 24px;
 }
 
 .nav-container {
   max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
   height: 100%;
 }
 
@@ -39,29 +38,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   width: 100%;
-  padding: 8px 24px;
+  padding: 12px 24px;
   background: none;
   border: none;
   cursor: pointer;
-  color: #4b5563;
-  transition: all 0.2s ease;
+  color: #d97706; /* Orangish text color */
+  transition: all 0.3s ease;
 }
 
 .nav-button:hover {
-  background-color: #f9fafb;
+  background-color: rgba(
+    255,
+    247,
+    230,
+    0.8
+  ); /* Slightly darker off-white on hover */
+  border-radius: 8px;
 }
 
 .nav-button.active {
-  color: #2563eb;
+  color: #ea580c; /* Darker orange for active state */
 }
 
 .nav-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease;
 }
 
 .nav-icon {
@@ -74,21 +79,21 @@
 }
 
 .nav-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
 }
 
 .nav-indicator {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: #2563eb;
+  background-color: #ea580c; /* Darker orange for the indicator */
   position: absolute;
-  bottom: 4px;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 
 .nav-button.active .nav-indicator {

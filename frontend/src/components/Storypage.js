@@ -5,8 +5,6 @@ import "./Storypage.css";
 const Storypage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Get the passed story data
   const { title, subtitle, text, audio_url, total_time, images } =
     location.state || {
       title: "Default Story Title",
@@ -21,24 +19,25 @@ const Storypage = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [audioError, setAudioError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageTransitioning, setIsImageTransitioning] = useState(false);
   const audioRef = useRef(null);
   const imageTransitionInterval = useRef(null);
 
-  // Construct full audio URL if it's a relative path
   const fullAudioUrl = audio_url.startsWith("http")
     ? audio_url
     : `http://localhost:8080${audio_url}`;
 
-  // Handle image transitions
   useEffect(() => {
     if (isPlaying && images?.length > 0) {
-      // Calculate transition interval based on total audio time
       const intervalTime = (total_time * 1000) / images.length;
-
       imageTransitionInterval.current = setInterval(() => {
-        setCurrentImageIndex((prevIndex) =>
-          prevIndex === images.length - 1 ? 0 : prevIndex + 1
-        );
+        setIsImageTransitioning(true);
+        setTimeout(() => {
+          setCurrentImageIndex((prevIndex) =>
+            prevIndex === images.length - 1 ? 0 : prevIndex + 1
+          );
+          setIsImageTransitioning(false);
+        }, 500);
       }, intervalTime);
     }
 
@@ -49,14 +48,11 @@ const Storypage = () => {
     };
   }, [isPlaying, images, total_time]);
 
-  // Audio event listeners
   useEffect(() => {
     const audio = audioRef.current;
-
     if (audio) {
       const updateTime = () => setCurrentTime(audio.currentTime);
       audio.addEventListener("timeupdate", updateTime);
-
       audio.addEventListener("ended", () => {
         setIsPlaying(false);
         setCurrentImageIndex(0);
@@ -108,68 +104,89 @@ const Storypage = () => {
             d="M15 19l-7-7 7-7"
           />
         </svg>
-        Back
+        Back to Home
       </button>
 
-      {/* Image Carousel */}
-      <div className="image-carousel">
-        {images && images.length > 0 && (
-          <div className="image-container">
-            <img
-              src={images[currentImageIndex]?.url}
-              alt={`Story illustration ${currentImageIndex + 1}`}
-              className="story-image"
-            />
-            <div className="image-indicators">
-              {images.map((_, index) => (
-                <div
-                  key={index}
-                  className={`indicator ${
-                    index === currentImageIndex ? "active" : ""
+      <div className="content-wrapper">
+        <div className="title-section">
+          <h1 className="story-title">{title}</h1>
+          <p className="story-subtitle">{subtitle}</p>
+        </div>
+
+        <div className="media-section">
+          <div className="image-carousel">
+            {images && images.length > 0 && (
+              <div className="image-container">
+                <img
+                  src={images[currentImageIndex]?.url}
+                  alt={`Story illustration ${currentImageIndex + 1}`}
+                  className={`story-image ${
+                    isImageTransitioning ? "fade" : ""
                   }`}
-                  onClick={() => setCurrentImageIndex(index)}
                 />
-              ))}
+                <div className="image-overlay" />
+                <div className="image-indicators">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`indicator ${
+                        index === currentImageIndex ? "active" : ""
+                      }`}
+                      onClick={() => setCurrentImageIndex(index)}
+                      aria-label={`Go to image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="audio-controls">
+            <button
+              className={`play-button ${isPlaying ? "playing" : ""}`}
+              onClick={toggleAudio}
+            >
+              {isPlaying ? (
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16" rx="1" />
+                  <rect x="14" y="4" width="4" height="16" rx="1" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+            </button>
+
+            <div className="progress-bar-container">
+              <div className="progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${(currentTime / total_time) * 100}%` }}
+                />
+              </div>
+              <div className="time-display">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(total_time)}</span>
+              </div>
             </div>
           </div>
-        )}
-      </div>
-
-      <div className="title-section">
-        <h1 className="story-title">{title}</h1>
-        <p className="story-subtitle">{subtitle}</p>
-      </div>
-
-      <div className="progress-bar-container">
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{ width: `${(currentTime / total_time) * 100}%` }}
-          />
         </div>
-        <div className="time-display">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(total_time)}</span>
+
+        <div className="story-text-container">
+          {text.split("\n").map((paragraph, index) => (
+            <p key={index} className="story-paragraph">
+              {paragraph}
+            </p>
+          ))}
         </div>
       </div>
-
-      <button className="play-button" onClick={toggleAudio}>
-        {isPlaying ? "Pause" : "Play"}
-      </button>
 
       <audio
         ref={audioRef}
         src={fullAudioUrl}
-        onLoadedMetadata={() => console.log("Audio metadata loaded")}
+        onError={(e) => setAudioError("Error loading audio")}
       />
-
-      <div className="story-text-container">
-        {text.split("\n").map((paragraph, index) => (
-          <p key={index} className="story-paragraph">
-            {paragraph}
-          </p>
-        ))}
-      </div>
     </div>
   );
 };
