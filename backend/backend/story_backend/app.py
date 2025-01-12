@@ -9,7 +9,9 @@ import random
 import multiprocessing
 import json
 import os
+# from googletrans import Translator
 from gtts import gTTS
+from deep_translator import GoogleTranslator
 
 from .bingart import BingArt
 from django.conf import settings
@@ -24,7 +26,7 @@ llm = Llama(model_path=model_path,
             n_threads=multiprocessing.cpu_count(),
             n_ctx=2048,
             seed = -1,
-            verbose=False,
+            verbose=True,
             use_mmap=True,  # Uses memory mapping
             use_mlock=False,
             #stop=["The end."]
@@ -109,6 +111,10 @@ moral = ["friendship", "diversity", "empathy", "respect", "courage", "honesty", 
 #     age: "all",
 #     imageStyle: "Storybook style",
 
+def translate_text_googletrans(text, source_language="en", target_language="ne"):
+    result = GoogleTranslator(source=source_language, target=target_language).translate(text)
+    return result
+
 def generate_story(data):
     topic = data.get('storyTopic', "").strip() or random.choice(children_story_topics)
     age_range = data.get('age', 0)
@@ -117,6 +123,7 @@ def generate_story(data):
     user_setting = data.get('storySettings', "").strip()
     prompt_user = data.get('storyText', "").strip()
     selected_moral_lessons = data.get('moral_lessons', [])
+    translation = data.get('language', 'en')
 
     if story_length == "short":
         word_count = 150
@@ -242,8 +249,13 @@ def generate_story(data):
     TEXT = text
 
     # sanitized_title = sanitize_filename(original_title)
+    if translation == "en":
+        return (original_title, text)
     
-    return (original_title, text)
+    else:
+        translated_title = translate_text_googletrans(original_title, source_language="en", target_language="ne")
+        translated_text = translate_text_googletrans(text, source_language="en", target_language="ne")
+        return (translated_title, translated_text)
 
 #OpenAI use garney bela matra
 
@@ -298,12 +310,10 @@ def generate_story(data):
         
 #         return audio_url, duration_seconds
         
-    # except Exception as e:
-    #     print(f"Error in text_to_speech: {str(e)}")
-    #     return None, 0
-    
+#     except Exception as e:
+#         print(f"Error in text_to_speech: {str(e)}")
+#         return None, 0
 
- # api key halna man lagena vane yo function use garum   
 def text_to_speech(text, voice="nova"):
     """
     Convert text to speech with background music and proper timing control.
@@ -403,6 +413,27 @@ def text_to_speech(text, voice="nova"):
     except Exception as e:
         print(f"Error in text_to_speech_with_bg_music: {str(e)}")
         return None, 0
+    
+
+ # api key halna man lagena vane yo function use garum   
+# def text_to_speech(text, target_language="en"):
+#     if not text:
+#         print("No text to convert to speech.")
+#         return None, 0
+
+#     # Generate the audio file
+#     tts = gTTS(text=text, lang=target_language)
+#     audio_file = "output.mp3"
+#     audio_path = os.path.join(MEDIA_ROOT, audio_file)
+#     tts.save(audio_path)
+
+#     # Calculate the duration of the audio file
+#     audio = AudioSegment.from_file(audio_path)
+#     duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
+
+#     # Return the URL and duration
+#     audio_url = os.path.join(settings.MEDIA_URL, audio_file)
+#     return audio_url, duration_seconds
 
 
 def generate_story_image(story, image_style):

@@ -13,18 +13,19 @@ def generate_story(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            input_text = data.get('text', '')
+    
+            print(data)
             
             if not input_text:
                 return JsonResponse({'error': 'No input provided'}, status=400)
             image_style = data.get('imageStyle', 'Storybook style')
-            
+            language = data.get('language', 'en')
             title, story = app.generate_story(data)
 
             # Create result containers
             audio_result = {'url': None, 'time': 0}
             image_results = []
-
+            
             def generate_audio():
                 try:
                     audio_url, total_time = app.text_to_speech(story)
