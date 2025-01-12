@@ -44,7 +44,7 @@ const SubscriptionPage = () => {
     { id: 1, name: "Unlimited Audio ", price: "Rs. 2000" },
     {
       id: 2,
-      name: "Unlimited Audio Visuals",
+      name: "Unlimited Visuals",
       price: subscribedPlans.includes(1) ? "Rs. 1000" : "Rs. 3000", // Dynamic price based on plan 1
     },
     { id: 3, name: "Games", price: "Rs. 2000" },
