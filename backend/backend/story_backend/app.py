@@ -298,24 +298,105 @@ def generate_story(data):
     
 
  # api key halna man lagena vane yo function use garum   
-def text_to_speech(text, target_language="en"):
+def text_to_speech(text, voice="nova"):
+    """
+    Convert text to speech with background music and proper timing control.
+    """
     if not text:
-        print("No text to convert to speech.")
+        print("No text to convert to speech")
         return None, 0
 
-    # Generate the audio file
-    tts = gTTS(text=text, lang=target_language)
-    audio_file = "output.mp3"
-    audio_path = os.path.join(MEDIA_ROOT, audio_file)
-    tts.save(audio_path)
+    # Intro and outro text with consistent timing
+    intro = ("<break time='3s'/> Twinkle twinkle little stars <break time='1s'/> "
+         "It's your StoryPal, back with another special story. <break time='1s'/> "
+         "Get cozy under your blanket <break time='1s'/> "
+         "as we journey into a world of imagination <break time='5s'/>")
 
-    # Calculate the duration of the audio file
-    audio = AudioSegment.from_file(audio_path)
-    duration_seconds = len(audio) / 1000  # Convert milliseconds to seconds
+    outro = ("<break time='6s'/> Stars are twinkling, "
+            "saying goodnight <break time='1s'/> "
+            "This is your StoryPal, <break time='1s'/> "
+            "watching over your dreams until next time <break time='5s'/>")
 
-    # Return the URL and duration
-    audio_url = os.path.join(settings.MEDIA_URL, audio_file)
-    return audio_url, duration_seconds
+    # Function to add pauses after sentences in main text
+    def add_timing_to_main_text(text):
+        # Add breaks after punctuation marks
+        text = text.replace(". ", ". <break time='0.8s'/> ")
+        text = text.replace("! ", "! <break time='1s'/> ")
+        text = text.replace("? ", "? <break time='1s'/> ")
+        text = text.replace("... ", "... <break time='1.2s'/> ")
+        return text
+
+    # Combine all parts with timing
+    full_text = f"{intro}{add_timing_to_main_text(text)}{outro}"
+
+    try:
+        # Initialize OpenAI client with API key
+        api_path = os.path.join(current_dir, 'data', 'api_token.txt')
+        api_key = open(api_path, "r").read().strip()
+        client = OpenAI(api_key=api_key)
+        
+        # Generate the narration audio
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice=voice,
+            input=full_text
+        )
+        
+        #os.makedirs(output_dir, exist_ok=True)
+        narration_file = "narration.mp3"
+        narration_path = os.path.join(settings.MEDIA_ROOT, narration_file)
+        with open(narration_path, 'wb') as file:
+            for chunk in response.iter_bytes():
+                file.write(chunk)
+
+        narration = AudioSegment.from_file(narration_path)
+        bg_music_path = os.path.join(settings.MEDIA_ROOT, "background_music.mp3")
+        background_music = AudioSegment.from_mp3(bg_music_path)
+
+        # Lower background music volume (reduce by 25dB)
+        background_music = background_music - 25
+
+        # Add 8 seconds of silence at the start of narration
+        intro_silence = AudioSegment.silent(duration=5000)  # 5 seconds of silence
+        ontro_silence = AudioSegment.silent(duration=8000) # 8 seconds of silence
+        narration = intro_silence + narration + ontro_silence
+
+        # Loop background music if shorter, trim if longer
+        while len(background_music) < len(narration):
+                background_music += background_music
+        background_music = background_music[:len(narration) + 16000]  # Add extra 16s for fade in/out
+
+        # Gradual fade-down after 8 seconds
+        fade_down_start = 5000  # Start fading down after 5 seconds
+        fade_down_duration = len(narration) - 5000  # Fade duration spans until narration ends
+        background_music = background_music.fade(to_gain=-35, start=fade_down_start, duration=fade_down_duration)
+
+        # Gradual volume restoration and fade-out after narration ends
+        fade_up_start = len(narration) -len(ontro_silence) # Start restoring volume after narration ends
+        fade_up_duration = 3000  # Restore volume over 8 seconds
+        fade_out_duration = 5000  # Fade out completely over 5 seconds
+        background_music = background_music.fade(to_gain=0, start=fade_up_start, duration=fade_up_duration)
+        background_music = background_music.fade_out(duration=fade_out_duration)
+
+        # Overlay narration and background music
+        final_audio = narration.overlay(background_music)
+
+        # Export the final mixed audio
+        # final_path = os.path.join(output_dir, "final_output.mp3")
+        final_audio_file = "final_output.mp3"
+        final_path = os.path.join(settings.MEDIA_ROOT, final_audio_file)
+        final_audio.export(final_path, format="mp3")
+
+        # Return the final audio file path and its duration
+        duration_seconds = len(final_audio) / 1000
+
+        audio_url = settings.MEDIA_URL + final_audio_file
+
+        return audio_url, duration_seconds
+
+    except Exception as e:
+        print(f"Error in text_to_speech_with_bg_music: {str(e)}")
+        return None, 0
 
 
 def generate_story_image(story):
