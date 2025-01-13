@@ -16,8 +16,8 @@ def generate_story(request):
     
             print(data)
             
-            if not input_text:
-                return JsonResponse({'error': 'No input provided'}, status=400)
+            # if not input_text:
+            #     return JsonResponse({'error': 'No input provided'}, status=400)
             image_style = data.get('imageStyle', 'Storybook style')
             language = data.get('language', 'en')
             title, story = app.generate_story(data)
