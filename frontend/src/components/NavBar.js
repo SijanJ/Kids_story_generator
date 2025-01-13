@@ -1,8 +1,5 @@
-// NavBar.jsx
 import React, { useState } from "react";
-import { Home, BookOpen, PenTool,CreditCard,DollarSign   } from "lucide-react";
-
-
+import { Home, BookOpen, PenTool, DollarSign } from "lucide-react";
 import "./NavBar.css";
 
 const NavBar = ({ onNavigate }) => {
@@ -17,7 +14,7 @@ const NavBar = ({ onNavigate }) => {
       path: "/story-mode",
     },
     {
-      icon: <DollarSign    className="nav-icon" />,
+      icon: <DollarSign className="nav-icon" />,
       label: "Subscription",
       path: "/pay",
     },

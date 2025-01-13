@@ -2,11 +2,11 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #fff6f3 0%, #fff 100%);
   padding: 1rem;
+  padding-bottom: 80px; /* Add padding to avoid overlap with the navbar */
   max-width: 600px;
   margin: 0 auto;
   color: #333;
 }
-
 .magic-text {
   text-align: center;
   font-size: 1.2rem;
@@ -35,40 +35,58 @@
   margin-bottom: 1.5rem;
 }
 
-.textarea-wrapper {
-  position: relative;
-  margin-bottom: 0.5rem;
-}
-
-.text-input {
+/* Story Topic Input */
+.topic-input {
   width: calc(100% - 2rem);
-  padding: 1rem;
+  padding: 0.75rem;
   border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.8);
+  border-radius: 0.5rem; /* Slightly rounded corners */
+  background: rgba(255, 255, 255, 0.9);
   color: #333;
-  font-size: 1rem;
-  resize: none;
+  font-size: 0.95rem;
+  height: 40px; /* Compact height */
   transition: all 0.3s ease;
 }
 
-.text-input {
-  height: 120px;
-}
-
-.settings-input {
-  height: 80px;
-}
-
-.text-input::placeholder {
+.topic-input::placeholder {
   color: #9ca3af;
 }
 
-.text-input:focus {
+.topic-input:focus {
   outline: none;
   border-color: #ff7f50;
   box-shadow: 0 0 0 2px rgba(255, 127, 80, 0.2);
   background: #fff;
+}
+
+/* Story Text Input */
+.story-text-input {
+  width: calc(100% - 2rem);
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem; /* More rounded corners */
+  background: rgba(255, 255, 255, 0.8);
+  color: #333;
+  font-size: 1rem;
+  height: 75px; /* Larger height for detailed input */
+  resize: none;
+  transition: all 0.3s ease;
+}
+
+.story-text-input::placeholder {
+  color: #9ca3af;
+}
+
+.story-text-input:focus {
+  outline: none;
+  border-color: #ff7f50;
+  box-shadow: 0 0 0 2px rgba(255, 127, 80, 0.2);
+  background: #fff;
+}
+
+.textarea-wrapper {
+  position: relative;
+  margin-bottom: 0.5rem;
 }
 
 .mic-button {
@@ -173,7 +191,7 @@
 }
 
 .select-dropdown {
-  width: 100%; /* Adjusted to make dropdowns shorter */
+  width: 100%;
   padding: 0.75rem;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
@@ -198,21 +216,36 @@
   color: #666;
 }
 
-.input-group {
+.button-group {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  gap: 1rem;
+  margin: 1rem 0;
 }
 
-.input-label {
-  font-size: 0.9rem;
+.settings-button {
+  flex: 1;
+  padding: 0.875rem;
+  border: 2px solid #ff7f50;
+  border-radius: 0.75rem;
+  background: white;
+  color: #ff7f50;
+  font-size: 1rem;
   font-weight: 500;
-  color: #666;
-  margin-left: 0.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.settings-button:hover {
+  background: rgba(255, 127, 80, 0.1);
+}
+
+.settings-button.active {
+  background: rgba(255, 127, 80, 0.15);
+  border-color: #ff6b3d;
 }
 
 .generate-button {
-  width: 100%;
+  flex: 1;
   padding: 0.875rem;
   border: none;
   border-radius: 0.75rem;
@@ -222,8 +255,6 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
 }
 
 .generate-button:hover:not(:disabled) {
@@ -235,6 +266,23 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.settings-section {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ... (rest of the styles remain the same) ... */
 
 @media (max-width: 480px) {
   .story-input-container {
@@ -258,5 +306,34 @@
   .generate-button {
     padding: 0.7rem;
     font-size: 0.9rem;
+  }
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(
+      255,
+      255,
+      255,
+      0.9
+    ); /* Semi-transparent white background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Ensure it appears above other content */
+  }
+
+  .loading-gif {
+    width: 140px; /* Adjust size as needed */
+    height: 100px;
+  }
+
+  .loading-overlay p {
+    margin-top: 16px;
+    font-size: 18px;
+    color: #333;
   }
 }
