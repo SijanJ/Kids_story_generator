@@ -22,7 +22,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(current_dir, 'model', 'textgen.gguf')
 
 llm = Llama(model_path=model_path, 
-            n_gpu_layers=-1,
+            n_gpu_layers=500,
             n_threads=multiprocessing.cpu_count(),
             n_ctx=2048,
             seed = -1,
@@ -116,15 +116,15 @@ def translate_text_googletrans(text, source_language="en", target_language="ne")
     return result
 
 def generate_story(data):
-    topic = data.get('storyTopic', "").strip() or random.choice(children_story_topics)
+    topic = data.get('storyText', "").strip() or random.choice(children_story_topics)
     age_range = data.get('age', 0)
     story_length = data.get('storyLength', 'short')
     user_main_character = data.get('main_character', "").strip()
     user_setting = data.get('storySettings', "").strip()
-    prompt_user = data.get('storyText', "").strip()
+    test = data.get('storyText', "").strip()
     selected_moral_lessons = data.get('moral_lessons', [])
     translation = data.get('language', 'en')
-
+    prompt_user = ""
     if story_length == "short":
         word_count = 150
     elif story_length == "medium":
