@@ -314,7 +314,7 @@ def generate_story(data):
 #         print(f"Error in text_to_speech: {str(e)}")
 #         return None, 0
 
-def text_to_speech(text, voice="nova"):
+def text_to_speech(text, langugage="en", voice="nova"):
     """
     Convert text to speech with background music and proper timing control.
     """
@@ -323,15 +323,30 @@ def text_to_speech(text, voice="nova"):
         return None, 0
 
     # Intro and outro text with consistent timing
-    intro = ("<break time='3s'/> Twinkle twinkle little stars <break time='1s'/> "
-         "It's your StoryPal, back with another special story. <break time='1s'/> "
-         "Get cozy under your blanket <break time='1s'/> "
-         "as we journey into a world of imagination <break time='5s'/>")
+    if langugage == "en":
+        intro = ("<break time='3s'/> Twinkle twinkle little stars <break time='1s'/> "
+            "It's your StoryPal, back with another special story. <break time='1s'/> "
+            "Get cozy under your blanket <break time='1s'/> "
+            "as we journey into a world of imagination <break time='5s'/>")
 
-    outro = ("<break time='6s'/> Stars are twinkling, "
-            "saying goodnight <break time='1s'/> "
-            "This is your StoryPal, <break time='1s'/> "
-            "watching over your dreams until next time <break time='5s'/>")
+        outro = ("<break time='6s'/> Stars are twinkling, "
+                "saying goodnight <break time='1s'/> "
+                "This is your StoryPal, <break time='1s'/> "
+                "watching over your dreams until next time <break time='5s'/>")
+    if langugage == "ne":
+        intro = ("<break time='3s'/> जुरेली चरी उड्यो नि <break time='1s'/> "
+         "आकाशमा चन्द्रमा झुल्यो नि <break time='1s'/> "
+         "म तिम्रो साथी कथा सुनाउन आएँ <break time='1s'/> "
+         "सपनाको देशमा लैजान आएँ <break time='1s'/> "
+         "ओछ्यानमा सुतेर आराम गर <break time='1s'/> "
+         "मीठो कथा सुन्न तयार हुनुस है <break time='5s'/>")
+
+        outro = ("<break time='6s'/> तारा पनि थाके नि <break time='1s'/> "
+                "जून पनि लुके नि <break time='1s'/> "
+                "तिम्रो साथी बिदा माग्छु अब <break time='1s'/> "
+                "मीठा सपना देख्नू है बाबु/नानी <break time='1s'/> "
+                "भोलि फेरि भेटौंला <break time='1s'/> "
+                "नयाँ कथा सुनौंला <break time='5s'/>")
 
     # Function to add pauses after sentences in main text
     def add_timing_to_main_text(text):
@@ -355,7 +370,7 @@ def text_to_speech(text, voice="nova"):
         response = client.audio.speech.create(
             model="tts-1",
             voice=voice,
-            input=full_text
+            input=full_text,
         )
         
         #os.makedirs(output_dir, exist_ok=True)

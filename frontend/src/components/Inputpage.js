@@ -76,6 +76,7 @@ const Inputpage = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
 
       const data = await response.json();
+      console.log(data);
       navigate("/story-mode", {
         state: {
           title: data.title,
