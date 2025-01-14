@@ -438,7 +438,9 @@ def text_to_speech(text, voice="nova"):
 
 def generate_story_image(story, image_style):
     try:
-        bing_art = BingArt(auth_cookie_U='1bDW7Inh3p_mssSEXyb3FEAkS7Xv1SuUg6fUmScOU-wsY14AkmDC3rBgZ69Wq6BKM4S435ajBslX8QgY8ooce_T2zGkHVTOPN6l1JSQVX_PxSae4T58pQDbWJUQhNft8Fupp0F2K6bvQXigLPEbl3YZ8GO2QLfrXFSNdneDOUfm62qAgmkAZIDtweBfEfvh-gmDtfnlsIPkUGD5DQgNsiotg2NHsN5pzU-lkUHQnKUA0')
+        authentication_path = os.path.join(current_dir, 'data', 'authentication_token.txt')
+        auth_cookie_U = open(authentication_path, "r").read().strip()
+        bing_art = BingArt(auth_cookie_U=auth_cookie_U)
         
         # Create diverse prompts from the story
         prompts = [

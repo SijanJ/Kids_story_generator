@@ -1,0 +1,25 @@
+Hack A week
+Story Generator for Kid(Generative AI)
+	Telling story based on the favorite toy/animal/game of a 	kid on bed time.
+	 Best practices to tell story in Nepali/Newari.
+	Convert text to speech if possible. 
+	Add impressive icons/animations on a story based on 	topics.
+	Character wise different languages (if possible)
+	Background music
+	Marketing
+		In app advertisement/Collaboration with 	Montessori/schools for advertisement, premium package for 	learning games.
+
+Gamified Collaborative Learning Platform
+	A multiplayer quiz game where students learn and 	collaborate in real-time, competing to solve problems.
+	Multi-subject quiz.
+	Don't know the marketing strategy 😂
+
+Morse code to Nepali and vv else English converter(AI for Social Good)
+	Helps secure transmission of signals like Bashanta Joshi 	have said. 
+	Very useful for interaction between blind people and 	abled person.
+	Marketing
+		Add premium in app morse code tutorial/API use.
+
+
+Google speech api call and return speed: around 5.5 word/sec
+Speech speed: 1471/10:11
