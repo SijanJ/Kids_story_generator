@@ -23,7 +23,7 @@ Follow these steps to set up the project locally:
 
 - Node.js (v14 or higher)
 - npm (v6 or higher)
-- Python (if working with the backend)
+- Python - Django (if working with the backend)
 
 ### Clone the Repository
 
@@ -138,4 +138,7 @@ This project requires an OpenAI API key for certain features. Alternatively, you
 
 ## Demo
 
-A demo video showcasing the application is available: []\(frontend\public\Media\StoryPal Screen record.mp4)
+Short demo video showcasing the application is available: 
+
+https://github.com/user-attachments/assets/d585a2b8-a5c5-4526-8aeb-75681476ede9
+
