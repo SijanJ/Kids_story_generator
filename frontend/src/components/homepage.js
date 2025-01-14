@@ -8,7 +8,7 @@ const Homepage = () => {
   const [currentFooterMessage, setCurrentFooterMessage] = useState(0);
 
   // Array of banner images
-  const images = ["AD1.png", "child1.jpg", "child4.jpg", "child5.jpg"];
+  const images = ["Ad1.png", "child4.jpg", "child5.jpg"];
 
   // Array of footer messages
   const footerMessages = [
@@ -18,13 +18,24 @@ const Homepage = () => {
     "Once upon a time... starts the journey to your dreams! 🌟",
   ];
 
+  // Array of games
+  const games = [
+    { name: "PopIt", icon: "🎮", isLocked: false },
+    { name: "Ludo", icon: "🎲", isLocked: false },
+    { name: "Puzzle", icon: "🧩", isLocked: true },
+    { name: "Memory", icon: "🃏", isLocked: true },
+    { name: "Quiz", icon: "❓", isLocked: true },
+    { name: "Word Hunt", icon: "📝", isLocked: true },
+    { name: "Math Fun", icon: "🔢", isLocked: true },
+    { name: "Story Game", icon: "📚", isLocked: true },
+  ];
+
   // Automatic slide transition every 5 seconds
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
     }, 5000);
-
-    return () => clearInterval(slideInterval); // Cleanup on unmount
+    return () => clearInterval(slideInterval);
   }, [images.length]);
 
   // Automatic footer message transition every 6 seconds
@@ -34,8 +45,7 @@ const Homepage = () => {
         (prevMessage) => (prevMessage + 1) % footerMessages.length
       );
     }, 6000);
-
-    return () => clearInterval(footerInterval); // Cleanup on unmount
+    return () => clearInterval(footerInterval);
   }, [footerMessages.length]);
 
   // Function to manually change slide
@@ -52,7 +62,6 @@ const Homepage = () => {
           alt={`Slide ${currentSlide + 1}`}
           className="banner-image animate-fade-in"
         />
-
         {/* Carousel Indicators */}
         <div className="carousel-indicators">
           {images.map((_, index) => (
@@ -74,7 +83,6 @@ const Homepage = () => {
           </span>
           Let's Imagine Together!
         </button>
-
         <button
           className="action-button"
           onClick={() => navigate("/story-mode")}
@@ -91,11 +99,40 @@ const Homepage = () => {
           Tell Us About Yourself!
         </button>
       </div>
-
-      {/* Footer Message */}
       <div className="footer-message animate-fade-in">
         <p>{footerMessages[currentFooterMessage]}</p>
       </div>
+
+      {/* Game Interface Section */}
+      <div className="game-section animate-fade-in">
+        <h2 className="game-title">
+          <span role="img" aria-label="game controller">
+            🎮
+          </span>
+          Ready to Play and Show Your Skills?
+        </h2>
+
+        <div className="game-grid">
+          {games.map((game, index) => (
+            <div
+              key={index}
+              className={`game-card ${game.isLocked ? "locked" : ""}`}
+            >
+              <div className="game-icon">{game.icon}</div>
+              <h3 className="game-name">
+                {game.name}
+                {game.isLocked && <span className="lock-icon"> 🔒</span>}
+              </h3>
+            </div>
+          ))}
+        </div>
+
+        <div className="game-bonus-message">
+          Complete stories to unlock more fun games! 🎉
+        </div>
+      </div>
+
+      {/* Footer Message */}
     </div>
   );
 };

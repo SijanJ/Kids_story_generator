@@ -28,7 +28,7 @@ def generate_story(request):
             
             def generate_audio():
                 try:
-                    audio_url, total_time = app.text_to_speech(story)
+                    audio_url, total_time = app.text_to_speech(story, language)
                     audio_result['url'] = audio_url
                     audio_result['time'] = total_time
                 except Exception as e:

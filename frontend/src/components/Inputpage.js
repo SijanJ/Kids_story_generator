@@ -76,6 +76,7 @@ const Inputpage = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
 
       const data = await response.json();
+      console.log(data);
       // const data = {
       //   title: "The Mouse and the Curious Cat",
       //   story:
